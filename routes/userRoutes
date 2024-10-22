@@ -1,7 +1,6 @@
 const User = require('../model/userModel')
 const express = require('express')
 const router = express.Router()
-const auth = require('../middleware/auth')
 const bcrypt = require('bcryptjs')
 
 //POST REQUEST
@@ -14,25 +13,19 @@ router.post('/signup',async(req,res)=>{
                 {phoneNumber:req.body.phoneNumber}
             ]  
     })
-    console.log(user)
+    console.log("User Not Found") 
     if(user){console.log("User is found",req.body.email)
-        return res.send("User Already Exist. Please Sign in")
+        return res.send("User Already Exist. Please Sign Up")
     }
     //password hashing
-    const salt = await bcrypt.genSalt(10) //?
-    const hashedPassword = await bcrypt.hash(req.body.password,salt)
+    const salt = await bcrypt.genSalt(10) //rounds 10 times
+    const hashedPassword = await bcrypt.hash(req.body.password,salt) //using this round, combined with a password >> create a new pw
     const userData = new User({
         ...req.body, //making the copy of req.body
         password:hashedPassword // this one I need to update
     })
-    await userData.save()
-    res.send(userData)
-    if(userData){
-        sendWelcomeEmail(req.body.email,req.body.name)
-    }else{
-        res.semd(
-            {message:"Please check again"}
-    )} 
+    await userData.save() // Saving to DB
+    res.send({user:userData,message:"Successfully signed in"}) //either object or text, cannot send both. 
 }catch(e){
     res.send("Some Internal Error Occurred")
 }})

@@ -63,5 +63,8 @@ double check  .gitignore
 node_module & .env is mentioned or not
 >> push to gitHub
 
-//Create model for signup 
-//route for signup 
+//Create model for signup -done
+//route for signup -done
+
+//signup flow (front + backend connectivity)
+//signin << token will b needed (routes + model)
