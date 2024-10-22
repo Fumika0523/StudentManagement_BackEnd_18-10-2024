@@ -62,3 +62,6 @@ npm run dev
 double check  .gitignore
 node_module & .env is mentioned or not
 >> push to gitHub
+
+//Create model for signup 
+//route for signup 

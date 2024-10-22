@@ -1,0 +1,78 @@
+const User = require('../model/userModel')
+const express = require('express')
+const router = express.Router()
+const auth = require('../middleware/auth')
+const bcrypt = require('bcryptjs')
+
+//POST REQUEST
+router.post('/signup',async(req,res)=>{
+    try{
+        //check if the user is already registered
+        let user = await User.findOne({
+            $or:[
+                {email:req.body.email},
+                {phoneNumber:req.body.phoneNumber}
+            ]  
+    })
+    console.log(user)
+    if(user){console.log("User is found",req.body.email)
+        return res.send("User Already Exist. Please Sign in")
+    }
+    //password hashing
+    const salt = await bcrypt.genSalt(10) //?
+    const hashedPassword = await bcrypt.hash(req.body.password,salt)
+    const userData = new User({
+        ...req.body, //making the copy of req.body
+        password:hashedPassword // this one I need to update
+    })
+    await userData.save()
+    res.send(userData)
+    if(userData){
+        sendWelcomeEmail(req.body.email,req.body.name)
+    }else{
+        res.semd(
+            {message:"Please check again"}
+    )} 
+}catch(e){
+    res.send("Some Internal Error Occurred")
+}})
+
+//Sign In
+router.post('/signin',async(req,res)=>{
+    try{
+        let user = await User.findOne({
+        //checking by user detail with email
+        email:req.body.email,
+        })
+        console.log(user)
+        //console.log(req.body.password)
+        if(!user){
+            return res.status(400).send
+            ({
+                message:"User Email Address Not Found"
+            })}
+            //checking by user with password
+            const isMatch = await bcrypt.compare(req.body.password,user.password)// from postman , from the email is matched?
+            if(!isMatch){
+                return res.status(400).send({
+                    message:"Please Check Your Password"
+                })}
+                //if user and isMatch both validations are successful then generate the token
+                if(isMatch && user){
+                    const token = await user.generateAuthToken()
+                    return res.status(200).send({
+                        message:"You have successfully Signed-in!!!",
+                        user:user,
+                        token:token,
+                    })
+                }
+            // If all conditions failed it will come to this
+            res.status(401).send({
+                message:"Your login credentials are incorrect,kindly check and re-enter!"
+            })
+    }catch(e){
+            res.status(500).send({message:"Some Internal Error"})
+    }
+})
+
+module.exports = router
