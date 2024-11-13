@@ -1,0 +1,97 @@
+const Admission = require('../model/admissionModel')
+const express = require('express')
+const router = express.Router()
+// const auth = require('../middleware/auth')
+
+//work with studentID
+//post
+router.post('/admission',async(req,res)=>{
+    try{
+        const admissionDetail = new Admission ({
+            ...req.body, // makingg the copy of req. body
+            studentId:req.user._id // who contacted
+        })
+        if(!admissionDetail){
+            res.status(401),send({message:"Unabel to contact to admission"})
+        }
+        await admissionDetail.save()
+        res.status(200).send({
+            admissionDetail:admissionDetail,message:"Your Admission detail has successfully been sent!"
+        })
+    }catch(e){
+        res.status(500).send({message:"Some Internal Error"})
+    }
+})
+//get (all)
+router.get('/alladmission',async(req,res)=>{
+    try{
+       console.log(req.user._id);
+       if(req.user){
+           const getAllAsmission = await req.user.populate("admissionRel")
+           console.log("test",getAllAsmission)
+
+       if(getAllAdmission){
+           res.send({"admissionData":req.user.admissionRel})
+       }else{
+           res.send({"message":"Admission is not added"})
+       }
+        }
+    //else{
+    //        res.send({"message":"User not Found, signin is failed!"})
+    //    }
+   }catch(e){
+       res.send({"message":"Some Internal Error"})
+   }
+})
+
+//get (single)
+router.get('/admission/:id',async(req,res)=>{
+    try{
+       if(req.user){
+           const getAdmission = await req.user.populate("admissionRel")
+   if(getAdmission){
+       const allAdmissions=req.user.admissionRel
+   let AdmissionById=allAdmissions.filter((element,index)=>{
+       return element._id==req.params.id
+   })
+   if(AdmissionById.length!=0){
+       res.send(AdmissionById)
+   }else{
+       res.send({message:"Admission Not Found,Enter the correct ID"})
+   }}}
+    //    else{
+    //        res.send("User Authentication Failed")
+    //    }
+       }catch(e){
+           res.send({"message":"Some Internal Error"})
+       }})
+
+//put (update) (edit >> front-end)
+router.put('/updateadmission/:id',auth,async(req,res)=>{
+    const updateAdmission = await Admission.findOneAndUpdate({_id:req.params.id,owner:req.user._id},req.body,{new:true, runValidators:true})
+    try{
+        console.log(updateAdmission)
+        if(!updateAdmission){
+        return res.send({message:"Can't update the Admission, please check again"})
+         }
+         res.send({message:"The Admission has been successfully updated",updateAdmission})
+    }catch(e){
+        res.send({message:"Some Internal Error Occur"})
+    }
+})
+
+//delete
+router.delete('/deleteadmin/:id',async(req,res)=>{
+    // try{
+        console.log("Delete Admission by ID",req.params.id)
+        const deleteAdmission = await Admission.findOneAndDelete({
+            _id:req.params.id,studentId:req.user._id
+        })
+        if(!deleteAdmission){
+            res.send({message:"Admission Not Found"})
+        }
+        res.send({message:"Admission has been deleted successfully",deleteAdmission})
+        // }catch(e){
+        //     res.send({message:"Some Internal Error"})
+        // }
+})

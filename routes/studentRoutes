@@ -1,0 +1,66 @@
+const Student = require('../model/studentModel')
+const express = require('express')
+const router = express.Router()
+const bcrypt = require ('bcryptjs')
+const sharp = require('sharp')
+const auth = require ('../middleware/auth')
+
+//POSRT
+router.post('/register',async(req,res)=>{
+    try{
+    let student = await Student.findOne({
+        $or:[
+            {email:req.body.email},
+            {phoneNumber:req.body.phoneNumber}
+        ]
+    })
+console.log("User Not Found")
+if(student){
+    console.log("Student is found",req.body.email)
+    return res.send("Student Already Exist. Please Log-in")
+}
+//password hashing
+const salt = await bcrypt.genSalt(10)
+const hashedPassword = await bcrypt.hash(req.body.password,salt)// using this round, combined with a password >> create a new pw
+const studentData = new Student({
+    ...req.body,
+    password:hashedPassword
+})
+await studentData.save()
+res.send({student:studentData,message:"Successfully registred"})
+    }catch(e){
+        res.send("Some Internal Error Occurred")
+    }})
+
+//Signed In
+router.post('/login',async(req,res)=>{
+    try{
+        let student = await Student.findOne({
+            username:req.body.username
+        })
+        if(!student){
+            return res.status(400).send({
+                message:"username Not Found"
+            })
+        //Checking by student with pw
+        const isMatch = await bcrypt.compare(req.body.password,user.password)
+        if(!isMatch){
+            return res.status(400).send({
+                message:"Please Check Your Password"
+            })}
+            if(isMatch && student){
+                const token = await student.generateAuthToken()
+                return res.status(200).send({
+                    message:"You have successfully Loged in!",
+                    student:student,
+                    token:token
+                })
+            }
+            re.status(401).send({
+                message:"Your login credentials are incorrect, kindly check and re-enter!"
+           })
+    }}catch(e){
+        res.status(500).send({
+            message:"Some internal error"
+        })
+    }})

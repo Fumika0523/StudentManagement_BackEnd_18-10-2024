@@ -2,7 +2,10 @@ const User = require('../model/userModel')
 const express = require('express')
 const router = express.Router()
 const bcrypt = require('bcryptjs')
+const sharp = require('sharp')
+const auth = require('../middleware/auth')
 
+// User can see everything, student can access only specific area
 //POST REQUEST
 router.post('/signup',async(req,res)=>{
     try{
@@ -15,7 +18,7 @@ router.post('/signup',async(req,res)=>{
     })
     console.log("User Not Found") 
     if(user){console.log("User is found",req.body.email)
-        return res.send("User Already Exist. Please Sign Up")
+        return res.send("User Already Exist. Please Log-in")
     }
     //password hashing
     const salt = await bcrypt.genSalt(10) //rounds 10 times
@@ -35,15 +38,16 @@ router.post('/signin',async(req,res)=>{
     try{
         let user = await User.findOne({
         //checking by user detail with email
-        email:req.body.email,
+        username:req.body.username
         })
-        console.log(user)
+       //console.log(user)
         //console.log(req.body.password)
         if(!user){
             return res.status(400).send
             ({
-                message:"User Email Address Not Found"
+                message:"Username Not Found"
             })}
+
             //checking by user with password
             const isMatch = await bcrypt.compare(req.body.password,user.password)// from postman , from the email is matched?
             if(!isMatch){
@@ -65,7 +69,77 @@ router.post('/signin',async(req,res)=>{
             })
     }catch(e){
             res.status(500).send({message:"Some Internal Error"})
+    }})
+
+    //UPDATE the profile photo
+//  router.post('/users/profile/upload/image',auth,upload.single('avatar'),async(req,res)=>{
+//         try{
+//             const buffer = await sharp (req.file.buffer).resize({width:100,height:100}).png().toBuffer()
+//             //req.user.avatar=req.file.buffer // directly updating
+//             req.user.avatar = buffer
+//             await req.user.save()
+//             if(buffer){
+//             res.send({message:"File Uploaded Successfully"})
+//         }
+//             //req.file.buffer >> hold the binary data
+//         }catch(e){
+//             console.log(e)
+//         }
+//     },(error,req,res,next)=>{
+//         res.send({showError:error.message})
+//         })
+//     })
+
+ 
+// GET
+router.get('/users/profile',auth,async(req,res)=>{
+    //res.send("ProfileRoute")
+    try{
+        console.log(req.token)
+       console.log(req.user)
+        const getProfile = await User.findById(req.user._id)
+        if(!getProfile){
+            res.send({
+                message:"The User Profile CANNOT BE FOUND!"
+            })
+        }
+        res.send({userData:getProfile}) //
+    }catch(e){
+        res.send({message:"Some Internal Error"})
     }
 })
 
+//UPDATE
+router.put('/users/profile',auth,async(req,res)=>{
+    try{
+      console.log("Update Profile ID", req.user._id)
+      if(req.body.password){
+        const salt = await bcrypt.genSalt(10)
+        const hashedPassword= await bcrypt.hash(req.body.password,salt)
+        req.body.password=hashedPassword
+         }
+         const updateUser = await User.findByIdAndUpdate(req.user._id,req.body,{new:true,runValidators:true})
+         if(!updateUser){res.send({message:"User Not Found"})
+        }res.send(updateUser)
+     }catch(e){
+        res.send({message:"Some Internal Error"})
+    }
+})
+
+//DELETE
+router.delete('/users/profile',auth,async(req,res)=>{
+    try{
+        console.log(req.token)
+        console.log(req.user._id)
+        console.log("DELETE PROFILE ID",req.user._id)
+        const deleteProfile = await User.findByIdAndDelete(req.user._id)
+        if(!deleteProfile){
+            res.send({message:"USER NOT FOUND"})
+        }res.send({
+            deleteProfile,message:"Profile Deleted successfully"
+        })
+    }catch(e){
+        res.send({message:"Some Internal Error"})
+    }
+})
 module.exports = router

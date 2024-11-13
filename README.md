@@ -68,3 +68,6 @@ node_module & .env is mentioned or not
 
 //signup flow (front + backend connectivity)
 //signin << token will b needed (routes + model)
+
+//complete user routes >> test with postman
+//create a dashboard : https://startbootstrap.com/previews/sb-admin-2#google_vignette
