@@ -5,8 +5,8 @@ const bcrypt = require ('bcryptjs')
 const sharp = require('sharp')
 const auth = require ('../middleware/auth')
 
-//POSRT
-router.post('/register',async(req,res)=>{
+//POST
+router.post('/registerstudent',async(req,res)=>{
     try{
     let student = await Student.findOne({
         $or:[
@@ -30,10 +30,11 @@ await studentData.save()
 res.send({student:studentData,message:"Successfully registred"})
     }catch(e){
         res.send("Some Internal Error Occurred")
-    }})
+    }
+    })
 
 //Signed In
-router.post('/login',async(req,res)=>{
+router.post('/loginstudent',async(req,res)=>{
     try{
         let student = await Student.findOne({
             username:req.body.username
@@ -42,12 +43,14 @@ router.post('/login',async(req,res)=>{
             return res.status(400).send({
                 message:"username Not Found"
             })
+        }
         //Checking by student with pw
-        const isMatch = await bcrypt.compare(req.body.password,user.password)
+         const isMatch = await bcrypt.compare(req.body.password,student.password)
+        console.log(isMatch)
         if(!isMatch){
             return res.status(400).send({
                 message:"Please Check Your Password"
-            })}
+             })}
             if(isMatch && student){
                 const token = await student.generateAuthToken()
                 return res.status(200).send({
@@ -56,11 +59,14 @@ router.post('/login',async(req,res)=>{
                     token:token
                 })
             }
-            re.status(401).send({
-                message:"Your login credentials are incorrect, kindly check and re-enter!"
-           })
-    }}catch(e){
+     }catch(e){
         res.status(500).send({
             message:"Some internal error"
         })
-    }})
+    }
+})
+
+//update
+//delete
+
+    module.exports= router
