@@ -8,6 +8,7 @@ const connection = require('./db/connection')
 const userRoutes = require('./routes/userRoutes')
 const studentRoutes = require('./routes/studentRoutes')
 const admissionRoutes = require('./routes/admissionRoutes')
+const courseRoutes = require('./routes/courseRoutes')
 
 connection()
 
@@ -20,6 +21,7 @@ app.get('/',(req,res)=>{
 app.use(userRoutes)
 app.use(studentRoutes)
 app.use(admissionRoutes)
+app.use(courseRoutes)
 
 app.listen(Port,()=>{
     console.log(`Server started at Port no.- ${Port}`)

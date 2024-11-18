@@ -7,7 +7,7 @@ const auth = require ('../middleware/auth')
 
 //POST
 router.post('/registerstudent',async(req,res)=>{
-    try{
+    // try{
     let student = await Student.findOne({
         $or:[
             {email:req.body.email},
@@ -28,9 +28,9 @@ const studentData = new Student({
 })
 await studentData.save()
 res.send({student:studentData,message:"Successfully registred"})
-    }catch(e){
-        res.send("Some Internal Error Occurred")
-    }
+    // }catch(e){
+    //     res.send("Some Internal Error Occurred")
+    // }
     })
 
 //Signed In
@@ -65,6 +65,14 @@ router.post('/loginstudent',async(req,res)=>{
         })
     }
 })
+
+//get (All)
+router.get('/allstudent',async(req,res)=>{
+    // Without Auth
+    const getAllStudent = await Student.find()
+    res.send(getAllStudent)
+    })
+
 
 //update
 router.put('/updatestudent/:id',async(req,res)=>{

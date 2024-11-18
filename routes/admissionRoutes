@@ -6,21 +6,29 @@ const router = express.Router()
 //work with studentID
 //post
 router.post('/admission',async(req,res)=>{
-    try{
+    //try{
+    //object destructuring
+        const {admissionDate} = req.body
+        const dateObj = new Date(admissionDate)
+        const year = dateObj.getFullYear(); //admissiondate year
+        const month = dateObj.getMonth() + 1; //get month always start 0, thats why plus 1
+
         const admissionDetail = new Admission ({
             ...req.body, // makingg the copy of req. body
        //     studentId:req.user._id // who contacted
+            admissionYear:year,
+            admissionMonth:month
         })
         if(!admissionDetail){
-            res.status(401),send({message:"Unabel to contact to admission"})
+            res.status(401).send({message:"Unabel to contact to admission"})
         }
         await admissionDetail.save()
         res.status(200).send({
             admissionDetail:admissionDetail,message:"Your Admission detail has successfully been sent!"
         })
-    }catch(e){
-        res.status(500).send({message:"Some Internal Error"})
-    }
+    // }catch(e){
+    //     res.status(500).send({message:"Some Internal Error"})
+    // }
 })
 
 //get (all)
@@ -53,29 +61,29 @@ router.get('/alladmission',async(req,res)=>{
 //get (single)
 router.get('/admission/:id',async(req,res)=>{
     //Without Auth
-    const getAdmission = await Admission.findById(req.params.id)
-    res.send(getAdmission)
+    // const getAdmission = await Admission.findById(req.params.id)
+    // res.send(getAdmission)
 
     //With Auth <<< TEST
-    // try{
-//        if(req.user){
-//            const getAdmission = await req.user.populate("admissionRel")
-//    if(getAdmission){
-//        const allAdmissions=req.user.admissionRel
-//    let AdmissionById=allAdmissions.filter((element,index)=>{
-//        return element._id==req.params.id
-//    })
-//    if(AdmissionById.length!=0){
-//        res.send(AdmissionById)
-//    }else{
-//        res.send({message:"Admission Not Found,Enter the correct ID"})
-//    }}}
-//     //    else{
-//     //        res.send("User Authentication Failed")
-//     //    }
-//        }catch(e){
-//            res.send({"message":"Some Internal Error"})
-//        }
+    try{
+       if(req.user){
+           const getAdmission = await req.user.populate("admissionRel")
+   if(getAdmission){
+       const allAdmissions=req.user.admissionRel
+   let AdmissionById=allAdmissions.filter((element,index)=>{
+       return element._id==req.params.id
+   })
+   if(AdmissionById.length!=0){
+       res.send(AdmissionById)
+   }else{
+       res.send({message:"Admission Not Found,Enter the correct ID"})
+   }}}
+    //    else{
+    //        res.send("User Authentication Failed")
+    //    }
+       }catch(e){
+           res.send({"message":"Some Internal Error"})
+       }
 })
 
 //put (update) (edit >> front-end)
@@ -110,5 +118,16 @@ router.delete('/deleteadmin/:id',async(req,res)=>{
         //     res.send({message:"Some Internal Error"})
         // }
 })
+
+//get monthly earning
+router.get('/earnings',async(req,res)=>{
+const currentYear = new Date().getFullYear()
+console.log(currentYear)
+//fetch the detail
+//find method, admissionYear, admissionMonth
+//res.send
+
+})
+
 
 module.exports = router
