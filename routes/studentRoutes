@@ -67,6 +67,33 @@ router.post('/loginstudent',async(req,res)=>{
 })
 
 //update
+router.put('/updatestudent/:id',async(req,res)=>{
+    const updateStudent = await Student.findOneAndUpdate({_id:req.params.id,owner:req.user._id},req.body,{new:true, runValidators:true})
+    try{
+        console.log(updateStudent)
+        if(!updateStudent){
+        return res.send({message:"Can't update the Student, please check again"})
+         }
+         res.send({message:"The Student has been successfully updated",updateStudent})
+    }catch(e){
+        res.send({message:"Some Internal Error Occur"})
+    }
+})
+
 //delete
+router.delete('/deletestudent/:id',async(req,res)=>{
+    // try{
+        console.log("Delete Student by ID",req.params.id)
+        const deleteStudent = await Student.findOneAndDelete({
+            _id:req.params.id,studentId:req.user._id
+        })
+        if(!deleteStudent){
+            res.send({message:"Student Not Found"})
+        }
+        res.send({message:"Student has been deleted successfully",deleteStudent})
+        // }catch(e){
+        //     res.send({message:"Some Internal Error"})
+        // }
+})
 
     module.exports= router
