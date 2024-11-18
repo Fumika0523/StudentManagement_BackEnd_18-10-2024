@@ -80,16 +80,19 @@ router.get('/admission/:id',async(req,res)=>{
 
 //put (update) (edit >> front-end)
 router.put('/updateadmission/:id',async(req,res)=>{
-    const updateAdmission = await Admission.findOneAndUpdate({_id:req.params.id,owner:req.user._id},req.body,{new:true, runValidators:true})
-    try{
-        console.log(updateAdmission)
-        if(!updateAdmission){
-        return res.send({message:"Can't update the Admission, please check again"})
-         }
-         res.send({message:"The Admission has been successfully updated",updateAdmission})
-    }catch(e){
-        res.send({message:"Some Internal Error Occur"})
-    }
+    //Without Auth
+    const updateAdmission = await Admission.findOneAndUpdate(req.params.id)
+
+    // const updateAdmission = await Admission.findOneAndUpdate({_id:req.params.id,owner:req.user._id},req.body,{new:true, runValidators:true})
+    // try{
+    //     console.log(updateAdmission)
+    //     if(!updateAdmission){
+    //     return res.send({message:"Can't update the Admission, please check again"})
+    //      }
+    //      res.send({message:"The Admission has been successfully updated",updateAdmission})
+    // }catch(e){
+    //     res.send({message:"Some Internal Error Occur"})
+    // }
 })
 
 //delete
