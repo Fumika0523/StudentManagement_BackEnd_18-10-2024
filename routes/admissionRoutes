@@ -138,9 +138,21 @@ var month=[1,2,3,4,5,6,7,8,9,10,11,12]
 function getMonthWords(monthno) {
 const monthAbbreviations = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 //month should be greater than or is equal to 1 , and always less than or is equal to 12.if not matching -> null
-//monthabbreviations is array,
+//monthabbreviations is array, so [monthno - 1]
 return monthno >= 1 && monthno <= 12 ? monthAbbreviations[monthno - 1] : null;
 }
+//to work on each month
+month.forEach((monthElement)=>{
+    //console.log(monthElement) //showing only month 1-12
+    const getAdmissionMonth = getAdmissionYear.filter((element)=>{
+        // console.log(element) // showing with admission Fee & admissionMonth
+        //admisionMOnth is same with mothElement
+        element.admissionMonth==2
+        console.log(monthElement,element.admissionMonth)
+    })
+    console.log(getAdmissionMonth)
+
+})
 })
 
 
