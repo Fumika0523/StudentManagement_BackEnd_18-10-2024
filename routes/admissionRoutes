@@ -121,12 +121,26 @@ router.delete('/deleteadmin/:id',async(req,res)=>{
 
 //get monthly earning
 router.get('/earnings',async(req,res)=>{
+//giving you are current year (2024)
 const currentYear = new Date().getFullYear()
 console.log(currentYear)
 //fetch the detail
 //find method, admissionYear, admissionMonth
-//res.send
-
+//currentYear
+const getAdmissionYear = await Admission.find({admissionYear:currentYear},{admissionFee:1,_id:0,admissionMonth:1})
+//  {
+//     "_id": "673b2ac03393aeb3ab007191",
+//     "admissionFee": 25000
+// }
+// _id:0 >> gives you hiding _id
+res.send(getAdmissionYear)
+var month=[1,2,3,4,5,6,7,8,9,10,11,12] 
+function getMonthWords(monthno) {
+const monthAbbreviations = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+//month should be greater than or is equal to 1 , and always less than or is equal to 12.if not matching -> null
+//monthabbreviations is array,
+return monthno >= 1 && monthno <= 12 ? monthAbbreviations[monthno - 1] : null;
+}
 })
 
 

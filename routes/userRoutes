@@ -38,6 +38,7 @@ router.post('/signin',async(req,res)=>{
     try{
         let user = await User.findOne({
         //checking by user detail with email
+        //username coming from postman which you entering
         username:req.body.username
         })
        //console.log(user)

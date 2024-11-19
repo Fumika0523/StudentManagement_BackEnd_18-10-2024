@@ -26,4 +26,13 @@ router.get('/allcourse',async(req,res)=>{
     res.send(getAllCourse)
 })
 
+//DELETE
+router.delete('/deletecourse/:id',async(req,res)=>{
+    try{
+
+    }catch(e){
+        res.send({message:"Some Internal Error"})
+    }
+})
+
 module.exports = router
