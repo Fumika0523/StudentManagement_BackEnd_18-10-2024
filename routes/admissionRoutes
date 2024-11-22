@@ -161,7 +161,19 @@ const getAdmissionMonth = await Admission.find({admissionMonth:currentMonth,admi
 console.log(getAdmissionMonth)
 const monthlyEarning = getAdmissionMonth.reduce((acc,cv)=>acc+cv.admissionFee,0)
 console.log(monthlyEarning)
-res.send({annualEarning,monthlyEarning})
+// res.send({annualEarning,monthlyEarning})
+res.send([{
+    title:"EARNINGS (MONTHLY)",
+    totalRevenue:monthlyEarning,
+    icon:"TfiBag",
+    color:"#4e73df"
+},
+{   
+    title:"EARNINGS (ANNUAL)",
+    totalRevenue:annualEarning,
+    icon:"FaDollarSign",
+    color:"#1cc88a"
+},])
 })
 
 

@@ -8,7 +8,7 @@ const auth = require('../middleware/auth')
 // User can see everything, student can access only specific area
 //POST REQUEST
 router.post('/signup',async(req,res)=>{
-    try{
+    // try{
         //check if the user is already registered
         let user = await User.findOne({
             $or:[
@@ -29,9 +29,10 @@ router.post('/signup',async(req,res)=>{
     })
     await userData.save() // Saving to DB
     res.send({user:userData,message:"Successfully signed in"}) //either object or text, cannot send both. 
-}catch(e){
-    res.send("Some Internal Error Occurred")
-}})
+// }catch(e){
+//     res.send("Some Internal Error Occurred")
+// }
+})
 
 //Sign In
 router.post('/signin',async(req,res)=>{

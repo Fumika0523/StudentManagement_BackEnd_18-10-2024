@@ -67,11 +67,23 @@ router.post('/loginstudent',async(req,res)=>{
 })
 
 //get (All)
-router.get('/allstudent',async(req,res)=>{
+router.get('/allstudent',auth,async(req,res)=>{
     // Without Auth
-    const getAllStudent = await Student.find()
-    res.send(getAllStudent)
-    })
+    // const getAllStudent = await Student.find()
+    // res.send(getAllStudent)
+
+    //With Auth
+    try{
+        console.log(req.token)
+        const getStudentData = await Student.find()
+        if(!getStudentData){
+            res.send({message:"The Student Data cannot b found"})
+        }res.send({studentData:getStudentData})
+    }catch(e){
+        res.send({message:"Some Internal Error"})
+    }
+
+})
 
 
 //update
@@ -93,7 +105,7 @@ router.delete('/deletestudent/:id',async(req,res)=>{
     // try{
         console.log("Delete Student by ID",req.params.id)
         const deleteStudent = await Student.findOneAndDelete({
-            _id:req.params.id,studentId:req.user._id
+            _id:req.params.id,studentId:req.student._id
         })
         if(!deleteStudent){
             res.send({message:"Student Not Found"})
