@@ -82,22 +82,53 @@ router.get('/allstudent',auth,async(req,res)=>{
     }catch(e){
         res.send({message:"Some Internal Error"})
     }
-
 })
+
+//get 1 user
+router.get('/student/:_id',auth,async(req,res)=>{
+    // Without Auth
+    // const getAllStudent = await Student.find()
+    // res.send(getAllStudent)
+
+    //With Auth
+    // try{
+    if(req.user){
+    const getStudent = await req.user.populate("studentRel")
+    console.log(getStudent)
+    // if(getStudent){
+    //     const allStudents=req.user.studentRel
+    // let StudentById=allStudents.filter((element,index)=>{
+    //     return element._id==req.params.id
+    // })
+    // if(StudentById.length=0){
+    //     res.send(StudentById)
+    // }else{
+    //     res.send({message:"Student Not Found,Enter the correct ID"})
+    // }    
+    //     }
+    
+         }
+         //else{
+        //     res.send("User Authentication Failed")
+        // }
+        // }catch(e){
+        //     res.send({"message":"Some Internal Error"})
+        // }
+ })
 
 
 //update
 router.put('/updatestudent/:id',async(req,res)=>{
     const updateStudent = await Student.findOneAndUpdate({_id:req.params.id,owner:req.user._id},req.body,{new:true, runValidators:true})
-    // try{
+    try{
         console.log(updateStudent)
         if(!updateStudent){
         return res.send({message:"Can't update the Student, please check again"})
          }
          res.send({message:"The Student has been successfully updated",updateStudent})
-    // }catch(e){
-    //     res.send({message:"Some Internal Error Occur"})
-    // }
+    }catch(e){
+        res.send({message:"Some Internal Error Occur"})
+    }
 })
 
 //delete

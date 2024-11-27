@@ -65,8 +65,8 @@ router.get('/admission/:id',async(req,res)=>{
 
     //With Auth <<< TEST
     try{
-       if(req.user){
-           const getAdmission = await req.user.populate("admissionRel")
+    if(req.user){
+    const getAdmission = await req.user.populate("admissionRel")
    if(getAdmission){
        const allAdmissions=req.user.admissionRel
    let AdmissionById=allAdmissions.filter((element,index)=>{
@@ -77,9 +77,6 @@ router.get('/admission/:id',async(req,res)=>{
    }else{
        res.send({message:"Admission Not Found,Enter the correct ID"})
    }}}
-    //    else{
-    //        res.send("User Authentication Failed")
-    //    }
        }catch(e){
            res.send({"message":"Some Internal Error"})
        }
