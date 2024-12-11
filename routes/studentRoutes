@@ -14,7 +14,7 @@ router.post('/registerstudent',async(req,res)=>{
             {phoneNumber:req.body.phoneNumber}
         ]
     })
-console.log("User Not Found")
+console.log(student)
 if(student){
     console.log("Student is found",req.body.email)
     return res.send("Student Already Exist. Please Log-in")
@@ -85,41 +85,26 @@ router.get('/allstudent',auth,async(req,res)=>{
 })
 
 //get 1 user
-router.get('/student/:_id',auth,async(req,res)=>{
+router.get('/student/:id',auth,async(req,res)=>{
     // Without Auth
     // const getAllStudent = await Student.find()
     // res.send(getAllStudent)
+// console.log(req.user)
 
     //With Auth
-    // try{
-    if(req.user){
-    const getStudent = await req.user.populate("studentRel")
-    console.log(getStudent)
-    // if(getStudent){
-    //     const allStudents=req.user.studentRel
-    // let StudentById=allStudents.filter((element,index)=>{
-    //     return element._id==req.params.id
-    // })
-    // if(StudentById.length=0){
-    //     res.send(StudentById)
-    // }else{
-    //     res.send({message:"Student Not Found,Enter the correct ID"})
-    // }    
-    //     }
-    
-         }
-         //else{
-        //     res.send("User Authentication Failed")
-        // }
-        // }catch(e){
-        //     res.send({"message":"Some Internal Error"})
-        // }
- })
+    console.log(req.params.id)
+    const getStudent = await Student.findById( req.user._id)
+    if(!getStudent){
+        res.send({message:"The student cant be found"})
+    }
+    else{res.send({StudentData:getStudent})
+}
+})
 
 
 //update
 router.put('/updatestudent/:id',async(req,res)=>{
-    const updateStudent = await Student.findOneAndUpdate({_id:req.params.id,owner:req.user._id},req.body,{new:true, runValidators:true})
+    const updateStudent = await Student.findOneAndUpdate({_id:req.params.id},req.body,{new:true, runValidators:true})
     try{
         console.log(updateStudent)
         if(!updateStudent){
@@ -136,7 +121,7 @@ router.delete('/deletestudent/:id',async(req,res)=>{
     // try{
         console.log("Delete Student by ID",req.params.id)
         const deleteStudent = await Student.findOneAndDelete({
-            _id:req.params.id,studentId:req.student._id
+            _id:req.params.id
         })
         if(!deleteStudent){
             res.send({message:"Student Not Found"})
