@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 const batchSchema = new mongoose.Schema({
-    batchNumber:{type:Number,required:true},
+    batchNumber:{type:String,required:true},
     sessionType:{type:String,required:true},
     courseName:{type:String,required:true},
     targetStudent:{type:String,required:true},
