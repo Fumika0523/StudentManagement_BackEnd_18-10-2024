@@ -2,12 +2,12 @@ const express = require('express')
 const Batch = require('../model/batchNumberModel')
 const router = express.Router()
 const auth = require('../middleware/auth')
+
 //get
 router.get('/allbatch',auth,async(req,res)=>{
 //without Auth
     // const getAllBatch = await Batch.find()
     // res.send(getAllBatch)
-
 
 //With AUth
 try{
@@ -36,18 +36,19 @@ router.post('/addbatch',auth,async(req,res)=>{
     //     res.status(500).send({message:"Some Internal Error"})
     // }
 })
+
 //update
 router.put('/updatebatch/:id',async(req,res)=>{
     const updateBatch = await Batch.findOneAndUpdate({_id:req.params.id},req.body,{new:true, runValidators:true})
-    try{
+    // try{
         console.log(updateBatch)
         if(!updateBatch){
         return res.send({message:"Can't update the Batch, please check again"})
          }
          res.send({message:"The Batch has been successfully updated",updateBatch})
-    }catch(e){
-        res.send({message:"Some Internal Error Occur"})
-    }
+    // }catch(e){
+    //     res.send({message:"Some Internal Error Occur"})
+    // }
 })
 
 //delete
