@@ -58,10 +58,10 @@ router.delete('/deletecourse/:id',async(req,res)=>{
     try{
         console.log("Delete Course by ID", req.params.id)
         const deleteCourse = await Course.findOneAndDelete({
-            _id:req.params._id
+            _id:req.params.id
         })
         if(!deleteCourse){
-            res.send({message:"Course Not Found"})
+           return res.send({message:"Course Not Found"})
         }
         res.send({message:'Course has been deleted successfully',deleteCourse})
     }catch(e){
