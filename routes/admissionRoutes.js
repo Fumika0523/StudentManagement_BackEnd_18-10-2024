@@ -5,7 +5,7 @@ const router = express.Router()
 
 //work with studentID
 //post
-router.post('/admission',async(req,res)=>{
+router.post('/addadmission',async(req,res)=>{
     //try{
     //object destructuring
         const {admissionDate} = req.body
