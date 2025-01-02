@@ -33,29 +33,20 @@ router.post('/addadmission',async(req,res)=>{
 //get (all)
 router.get('/alladmission',async(req,res)=>{
     // without Auth
-    const getAllAsmission = await Admission.find()
-    res.send(getAllAsmission)
+    // const getAllAsmission = await Admission.find()
+    // res.send(getAllAsmission)
 
     // With Auth << TEST
-    //try{
-    //    console.log(req.user._id);
-    //    if(req.user){
-    //        const getAllAsmission = await req.user.populate("admissionRel")
-    //        console.log("test",getAllAsmission)
-
-    //    if(getAllAdmission){
-    //        res.send({"admissionData":req.user.admissionRel})
-    //    }else{
-    //        res.send({"message":"Admission is not added"})
-    //    }
-    //     }
-    //else{
-    //        res.send({"message":"User not Found, signin is failed!"})
-    //    }
-//    }catch(e){
-//        res.send({"message":"Some Internal Error"})
-//    }
-})
+    try{
+        console.log(req.token)
+        const getAdmissionData = await Admission.find()
+        if(!getAdmissionData){
+            res.send({message:"The Admission Data canot be found"})
+        }res.send({admissionData:getAdmissionData})
+    }catch(e){
+        res.send({message:"Some Internal Error"})
+    }
+    })
 
 //get (single)
 router.get('/admission/:id',async(req,res)=>{
