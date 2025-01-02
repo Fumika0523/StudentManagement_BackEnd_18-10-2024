@@ -4,7 +4,7 @@ const admissionSchema = new mongoose.Schema({
     admissionSource:{type:String,required:true},
     // admissionClass:{type:String,required:true},
     admissionFee:{type:Number,required:true},
-    admissionDate:{type:Date,required:true},
+    admissionDate:{type:Number,required:true},
     admissionYear:{type:Number},
     admissionMonth:{type:Number},
     studentId:{

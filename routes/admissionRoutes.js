@@ -76,26 +76,26 @@ router.get('/admission/:id',async(req,res)=>{
 //put (update) (edit >> front-end)
 router.put('/updateadmission/:id',async(req,res)=>{
     //Without Auth
-    const updateAdmission = await Admission.findOneAndUpdate(req.params.id)
+    // const updateAdmission = await Admission.findOneAndUpdate(req.params.id)
 
-    // const updateAdmission = await Admission.findOneAndUpdate({_id:req.params.id,owner:req.user._id},req.body,{new:true, runValidators:true})
-    // try{
-    //     console.log(updateAdmission)
-    //     if(!updateAdmission){
-    //     return res.send({message:"Can't update the Admission, please check again"})
-    //      }
-    //      res.send({message:"The Admission has been successfully updated",updateAdmission})
-    // }catch(e){
-    //     res.send({message:"Some Internal Error Occur"})
-    // }
+    const updateAdmission = await Admission.findOneAndUpdate({_id:req.params.id},req.body,{new:true, runValidators:true})
+    try{
+        console.log(updateAdmission)
+        if(!updateAdmission){
+        return res.send({message:"Can't update the Admission, please check again"})
+         }
+         res.send({message:"The Admission has been successfully updated",updateAdmission})
+    }catch(e){
+        res.send({message:"Some Internal Error Occur"})
+    }
 })
 
 //delete
-router.delete('/deleteadmin/:id',async(req,res)=>{
+router.delete('/deleteadmission/:id',async(req,res)=>{
     // try{
         console.log("Delete Admission by ID",req.params.id)
         const deleteAdmission = await Admission.findOneAndDelete({
-            _id:req.params.id,studentId:req.user._id
+            _id:req.params.id
         })
         if(!deleteAdmission){
             res.send({message:"Admission Not Found"})
