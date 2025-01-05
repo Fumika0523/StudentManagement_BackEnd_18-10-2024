@@ -1,12 +1,13 @@
 const mongoose = require ('mongoose')
 
 const admissionSchema = new mongoose.Schema({
+    courseName:{type:String,required:true},
     admissionSource:{type:String,required:true},
     // admissionClass:{type:String,required:true},
     admissionFee:{type:Number,required:true},
     admissionDate:{type:Number,required:true},
     admissionYear:{type:Number},
-    admissionMonth:{type:Number},
+    admissionMonth:{type:String},
     studentId:{
         type:mongoose.Schema.Types.ObjectID,
         ref:"Student",
