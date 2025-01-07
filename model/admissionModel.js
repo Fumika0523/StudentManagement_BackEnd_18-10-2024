@@ -3,9 +3,8 @@ const mongoose = require ('mongoose')
 const admissionSchema = new mongoose.Schema({
     courseName:{type:String,required:true},
     admissionSource:{type:String,required:true},
-    // admissionClass:{type:String,required:true},
     admissionFee:{type:Number,required:true},
-    admissionDate:{type:Number,required:true},
+    admissionDate:{type:Date,required:true},
     admissionYear:{type:Number},
     admissionMonth:{type:String},
     studentId:{
