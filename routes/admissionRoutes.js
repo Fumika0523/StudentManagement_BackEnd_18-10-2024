@@ -6,7 +6,7 @@ const router = express.Router()
 //work with studentID
 //post
 router.post('/addadmission',async(req,res)=>{
-    //try{
+    try{
     //object destructuring
         console.log("Add Addmission Route")
         const {admissionDate} = req.body
@@ -19,7 +19,7 @@ router.post('/addadmission',async(req,res)=>{
             admissionYear:year,
             admissionMonth:month
         })
-        
+        console.log(req.body)
         if(!admissionDetail){
             res.status(401).send({message:"Unabel to contact to admission"})
         }
@@ -28,9 +28,10 @@ router.post('/addadmission',async(req,res)=>{
             admissionDetail:admissionDetail,message:"Your Admission detail has successfully been sent!"
         })
         console.log(admissionDetail)
-    // }catch(e){
-    //     res.status(500).send({message:"Some Internal Error"})
-    // }
+    }catch(e){
+        res.status(500).send({message:"Some Internal Error"})
+        
+    }
 })
 
 //get (all)
