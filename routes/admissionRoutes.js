@@ -12,7 +12,7 @@ router.post('/addadmission',async(req,res)=>{
         const {admissionDate} = req.body
         const dateObj = new Date(admissionDate)
         const year = dateObj.getFullYear(); //admissiondate year
-        const month = dateObj.getMonth() + 1; //get month always start 0, thats why plus 1
+        const month = dateObj.toLocaleString('default',{month:'long'}) //get month always start 0, thats why plus 1
         const admissionDetail = new Admission ({
             ...req.body, // makingg the copy of req. body
        //     studentId:req.user._id // who contacted
@@ -30,7 +30,6 @@ router.post('/addadmission',async(req,res)=>{
         console.log(admissionDetail)
     }catch(e){
         res.status(500).send({message:"Some Internal Error"})
-        
     }
 })
 
@@ -74,7 +73,7 @@ router.get('/admission/:id',async(req,res)=>{
    }}}
        }catch(e){
            res.send({"message":"Some Internal Error"})
-       }
+    }
 })
 
 //put (update) (edit >> front-end)
