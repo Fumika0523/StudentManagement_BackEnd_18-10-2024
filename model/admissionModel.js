@@ -2,6 +2,7 @@ const mongoose = require ('mongoose')
 
 const admissionSchema = new mongoose.Schema({
     courseName:{type:String,required:true},
+    studentName:{type:String,required:true},
     admissionSource:{type:String,required:true},
     admissionFee:{type:Number,required:true},
     admissionDate:{type:Date,required:true},
