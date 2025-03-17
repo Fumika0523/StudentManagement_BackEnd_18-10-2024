@@ -11,6 +11,7 @@ const admissionRoutes = require('./routes/admissionRoutes')
 const courseRoutes = require('./routes/courseRoutes')
 const batchRoutes = require('./routes/batchRoutes')
 
+
 connection()
 
 app.use(express.json())

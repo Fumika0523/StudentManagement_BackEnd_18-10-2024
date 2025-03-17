@@ -1,37 +1,61 @@
 const Admission = require('../model/admissionModel')
+const Student = require('../model/studentModel')
 const express = require('express')
 const router = express.Router()
-// const auth = require('../middleware/auth')
+ const auth = require('../middleware/auth')
 
 //work with studentID
 //post
-router.post('/addadmission',async(req,res)=>{
+router.post('/addadmission',auth,async(req,res)=>{
     try{
     //object destructuring
         console.log("Add Addmission Route")
+        console.log(req.user)
         const {admissionDate} = req.body
         const dateObj = new Date(admissionDate)
         const year = dateObj.getFullYear(); //admissiondate year
-        const month = dateObj.toLocaleString('default',{month:'long'}) //get month always start 0, thats why plus 1
+        const month = dateObj.toLocaleString('default',{month:'short'}) //get month always start 0, thats why plus 1
         const admissionDetail = new Admission ({
             ...req.body, // makingg the copy of req. body
-       //     studentId:req.user._id // who contacted
+             studentId:req.body.studentId, // get 1 single student.
+             admissionId:req.body._Id,
             admissionYear:year,
-            admissionMonth:month
+            admissionMonth:month,
         })
-        console.log(req.body)
+        console.log(req.body.studentId) 
+        //req.studentId, student.findById(req.studentId) >>get 1 single student >>>> object student.courseName === req.courseName >> student.courseId == req.courseId, >>> await student.save() >> save it to the DB, courseFee
+        const getStudent = await Student.findById(req.body.studentId) // getting 1 student id
+        console.log(getStudent)
+        //courseName
+       // getStudent.courseName = admissionDetail.courseName
+        //preferredCourseName
+        getStudent.preferredCourseName = admissionDetail.preferredCourseName
+        //courseId
+        getStudent.courseId = admissionDetail.courseId
+        //admissionId
+        // getStudent.admissionId=admissionDetail.admissionId
+        //admissionFee
+        getStudent.admissionFee = admissionDetail.admissionFee,
+        //courseFee
+        getStudent.courseFee = admissionDetail.courseFee
+       
+        //admissionDate.
+        getStudent.admissionDate = admissionDetail.admissionFee
+        await getStudent.save() // saving to 1 single student
+        console.log(admissionDetail)
         if(!admissionDetail){
             res.status(401).send({message:"Unabel to contact to admission"})
         }
-        await admissionDetail.save()
+        await admissionDetail.save()      
         res.status(200).send({
-            admissionDetail:admissionDetail,message:"Your Admission detail has successfully been sent!"
+            admissionDetail:admissionDetail,
+            message:"Your Admission detail has successfully been sent!"
         })
-        console.log(admissionDetail)
-    }catch(e){
-        res.status(500).send({message:"Some Internal Error"})
-    }
+  }catch(e){
+           res.send({"message":"Some Internal Error"})
+  }
 })
+//Table should be filled in View Student, prefered course in Student Model
 
 //get (all)
 router.get('/alladmission',async(req,res)=>{
@@ -52,29 +76,38 @@ router.get('/alladmission',async(req,res)=>{
     })
 
 //get (single)
-router.get('/admission/:id',async(req,res)=>{
+router.get('/admission/:id',auth,async(req,res)=>{
+    const admissionById = await Admission.findById(
+        {_id:req.params.id}
+    )
+    if(!admissionById){
+        res.send({message:"Admission data is not found"})
+    }res.send({admissionData:admissionById})
+})
+
     //Without Auth
     // const getAdmission = await Admission.findById(req.params.id)
     // res.send(getAdmission)
 
     //With Auth <<< TEST
-    try{
-    if(req.user){
-    const getAdmission = await req.user.populate("admissionRel")
-   if(getAdmission){
-       const allAdmissions=req.user.admissionRel
-   let AdmissionById=allAdmissions.filter((element,index)=>{
-       return element._id==req.params.id
-   })
-   if(AdmissionById.length!=0){
-       res.send(AdmissionById)
-   }else{
-       res.send({message:"Admission Not Found,Enter the correct ID"})
-   }}}
-       }catch(e){
-           res.send({"message":"Some Internal Error"})
-    }
-})
+    //try{
+//     if(req.user){
+//     const getAdmission = await req.user.populate("admissionRel")
+//    if(getAdmission){
+//        const allAdmissions=req.user.admissionRel
+//    let AdmissionById=allAdmissions.filter((element,index)=>{
+//        return element._id==req.params.id
+//    })
+//    if(AdmissionById.length!=0){
+//        res.send(AdmissionById)
+//    }else{
+//        res.send({message:"Admission Not Found,Enter the correct ID"})
+//    }}}
+     // }catch(e){
+    //        res.send({"message":"Some Internal Error"})
+    // )
+
+
 
 //put (update) (edit >> front-end)
 router.put('/updateadmission/:id',async(req,res)=>{
@@ -164,7 +197,19 @@ res.send([{
     totalRevenue:annualEarning,
     icon:"FaDollarSign",
     color:"#1cc88a"
-},])
+},
+{
+    title:"TASKS",
+    totalRevenue:"50%",
+    icon:"FaClipboardList",
+    color:"#36b9cc"
+},
+{
+    title:"PENDING REQUESTS",
+    totalRevenue:"18",
+    icon:"IoIosChatbubbles",
+    color:"#f6c23e"
+}])
 })
 
 

@@ -15,7 +15,7 @@ const admissionSchema = new mongoose.Schema({
     },
     courseId:{
         type:mongoose.Schema.Types.ObjectID,
-        red:"Course",
+        ref:"Course",
         required:true
     }
 },{

@@ -23,10 +23,6 @@ router.post('/addcourse',auth,async(req,res)=>{
 
 //get (All)
 router.get('/allcourse',async(req,res)=>{
-    //Without Auth
-    // const getAllCourse = await Course.find()
-    // res.send(getAllCourse)
-
     //with auth
     try{
         console.log(req.token)
@@ -51,7 +47,6 @@ router.put('/updatecourse/:id',async(req,res)=>{
         res.send({message:"Some Internal Error"})
     }    
 })
-
 
 //DELETE
 router.delete('/deletecourse/:id',async(req,res)=>{
