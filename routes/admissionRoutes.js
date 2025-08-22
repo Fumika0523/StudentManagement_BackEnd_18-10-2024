@@ -18,18 +18,19 @@ router.post('/addadmission',auth,async(req,res)=>{
         const admissionDetail = new Admission ({
             ...req.body, // makingg the copy of req. body
              studentId:req.body.studentId, // get 1 single student.
-             admissionId:req.body._Id,
+        
             admissionYear:year,
             admissionMonth:month,
         })
         console.log(req.body.studentId) 
+        admissionDetail.admissionId = admissionDetail._id;
         //req.studentId, student.findById(req.studentId) >>get 1 single student >>>> object student.courseName === req.courseName >> student.courseId == req.courseId, >>> await student.save() >> save it to the DB, courseFee
         const getStudent = await Student.findById(req.body.studentId) // getting 1 student id
         console.log(getStudent)
         //courseName
-       // getStudent.courseName = admissionDetail.courseName
-        //preferredCourseName
-        getStudent.preferredCourseName = admissionDetail.preferredCourseName
+        getStudent.courseName = admissionDetail.courseName
+        //preferredCourses
+        getStudent.preferredCourses = admissionDetail.preferredCourses
         //courseId
         getStudent.courseId = admissionDetail.courseId
         //admissionId
@@ -40,7 +41,7 @@ router.post('/addadmission',auth,async(req,res)=>{
         getStudent.courseFee = admissionDetail.courseFee
        
         //admissionDate.
-        getStudent.admissionDate = admissionDetail.admissionFee
+        getStudent.admissionDate = admissionDetail.admissionDate
         await getStudent.save() // saving to 1 single student
         console.log(admissionDetail)
         if(!admissionDetail){

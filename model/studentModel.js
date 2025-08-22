@@ -11,7 +11,7 @@ const studentSchema = new mongoose.Schema({
     birthdate:{type:Date,required:true},
     courseName:{type:String,required:false},//when you add the admission
     admissionFee:{type:Number,required:false},
-    preferredCourseName:{type:[String],required:false,default:[]}, //when you add the student
+    preferredCourses:{type:[String],required:false,default:[]}, //when you add the student
     courseId:{
             type:mongoose.Schema.Types.ObjectID,
             ref:"Course",

@@ -11,13 +11,14 @@ const admissionSchema = new mongoose.Schema({
     studentId:{
         type:mongoose.Schema.Types.ObjectID,
         ref:"Student",
-        required:true // 
+        required:true 
     },
     courseId:{
         type:mongoose.Schema.Types.ObjectID,
         ref:"Course",
         required:true
-    }
+    },
+      admissionId: { type: mongoose.Schema.Types.ObjectId }
 },{
     timestamps:true
 })
