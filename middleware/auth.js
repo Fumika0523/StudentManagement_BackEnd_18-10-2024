@@ -12,7 +12,7 @@ const auth = async(req,res,next)=>{
             })
         }
         const token =req.header('Authorization').replace("Bearer ","")
-        const decode = jwt.verify(token,"nodejs")
+        const decode = jwt.verify(token,process.env.JWT_SECRET_KEY || "nodejs")
         req.token = token
         const user = await User.findOne({_id:decode._id})
         req.user = user
@@ -26,4 +26,9 @@ const auth = async(req,res,next)=>{
         res.send({message:"Authentication Error"})
     }}
 
-    module.exports = auth
+const authorizationRole=(req,res,next)=>{
+    console.log("Role","admin")
+    res.send({"role":"admin"})
+    next()
+}
+    module.exports = {auth,authorizationRole}

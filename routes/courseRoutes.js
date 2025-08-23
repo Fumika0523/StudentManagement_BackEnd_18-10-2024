@@ -1,7 +1,7 @@
 const Course = require('../model/courseModel')
 const express = require('express')
 const router = express.Router()
-const auth = require('../middleware/auth')
+const {auth} = require('../middleware/auth')
 
 
 //add

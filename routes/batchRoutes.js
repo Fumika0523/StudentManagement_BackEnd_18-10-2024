@@ -1,7 +1,7 @@
 const express = require('express')
 const Batch = require('../model/batchNumberModel')
 const router = express.Router()
-const auth = require('../middleware/auth')
+const {auth} = require ('../middleware/auth')
 
 //get
 router.get('/allbatch',auth,async(req,res)=>{

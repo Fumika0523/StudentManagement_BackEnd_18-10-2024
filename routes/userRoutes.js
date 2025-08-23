@@ -3,7 +3,14 @@ const express = require('express')
 const router = express.Router()
 const bcrypt = require('bcryptjs')
 const sharp = require('sharp')
-const auth = require('../middleware/auth')
+const {auth, authorizationRole} = require ('../middleware/auth')
+
+
+router.get("/test",authorizationRole,(req,res)=>{
+    console.log("test")
+})
+
+
 
 // User can see everything, student can access only specific area
 //POST REQUEST

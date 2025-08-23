@@ -8,13 +8,19 @@ const userSchema = new mongoose.Schema({
     phoneNumber:{type:Number,required:true},
     gender:{type:String,default:"Rather not say"},
     birthdate:{type:Date,required:true},
+    role:{
+        type:String,
+        enum:["admin","user","manager","supportTeam","testingTeam","guest"],
+        required:true,
+        default:"user"
+    }
 },{
     timestamps:true //registered time
 })
 
 userSchema.methods.generateAuthToken = async function(req,res){
     const user = this
-    const token = jwt.sign({_id:user.id},process.env.JWT_SECRET_KEY)
+    const token = jwt.sign({_id:user.id,role:user.role},process.env.JWT_SECRET_KEY)
     console.log(token)
     return token
 }

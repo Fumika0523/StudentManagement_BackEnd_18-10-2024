@@ -3,7 +3,7 @@ const express = require('express')
 const router = express.Router()
 const bcrypt = require ('bcryptjs')
 const sharp = require('sharp')
-const auth = require ('../middleware/auth')
+const {auth} = require ('../middleware/auth')
 
 //POST
 //Add student

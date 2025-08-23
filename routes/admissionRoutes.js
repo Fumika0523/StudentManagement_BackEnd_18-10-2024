@@ -2,7 +2,7 @@ const Admission = require('../model/admissionModel')
 const Student = require('../model/studentModel')
 const express = require('express')
 const router = express.Router()
- const auth = require('../middleware/auth')
+const {auth} = require ('../middleware/auth')
 
 //work with studentID
 //post
