@@ -10,8 +10,6 @@ router.get("/test",authorizationRole,(req,res)=>{
     console.log("test")
 })
 
-
-
 // User can see everything, student can access only specific area
 //POST REQUEST
 router.post('/signup',async(req,res)=>{

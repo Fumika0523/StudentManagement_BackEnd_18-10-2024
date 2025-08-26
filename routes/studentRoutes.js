@@ -37,7 +37,7 @@ res.send({student:studentData,message:"Successfully registred"})
 
 //Signed In
 router.post('/loginstudent',async(req,res)=>{
-    try{
+    // try{
         let student = await Student.findOne({
             username:req.body.username
         })
@@ -61,11 +61,11 @@ router.post('/loginstudent',async(req,res)=>{
                     token:token
                 })
             }
-     }catch(e){
-        res.status(500).send({
-            message:"Some internal error"
-        })
-    }
+    //  }catch(e){
+    //     res.status(500).send({
+    //         message:"Some internal error"
+    //     })
+    // }
 })
 
 //get (All)
