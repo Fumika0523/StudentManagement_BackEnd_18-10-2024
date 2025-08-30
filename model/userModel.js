@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
     birthdate:{type:Date,required:true},
     role:{
         type:String,
-        enum:["admin","user","manager","supportTeam","testingTeam","guest"],
+        enum:["admin","user","manager","supportTeam","testingTeam","guest","student"],
         required:true,
         default:"user"
     }

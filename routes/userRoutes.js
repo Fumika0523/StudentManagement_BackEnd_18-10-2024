@@ -4,6 +4,7 @@ const router = express.Router()
 const bcrypt = require('bcryptjs')
 const sharp = require('sharp')
 const {auth, authorizationRole} = require ('../middleware/auth')
+const Student = require('../model/studentModel')
 
 
 router.get("/test",authorizationRole,(req,res)=>{
@@ -12,36 +13,65 @@ router.get("/test",authorizationRole,(req,res)=>{
 
 // User can see everything, student can access only specific area
 //POST REQUEST
-router.post('/signup',async(req,res)=>{
-    // try{
-        //check if the user is already registered
-        let user = await User.findOne({
-            $or:[
-                {email:req.body.email},
-                {phoneNumber:req.body.phoneNumber}
-            ]  
-    })
-    console.log("User Not Found") 
-    if(user){console.log("User is found",req.body.email)
-        return res.send("User Already Exist. Please Log-in")
-    }
-    //password hashing
-    const salt = await bcrypt.genSalt(10) //rounds 10 times
-    const hashedPassword = await bcrypt.hash(req.body.password,salt) //using this round, combined with a password >> create a new pw
+router.post('/signup', async (req, res) => {
+  try {
+    // check if the user is already registered
+    let user = await User.findOne({
+      $or: [
+        { email: req.body.email },
+        { phoneNumber: req.body.phoneNumber }
+      ]
+    });
+
+if (user) { console.log("User is found", req.body.email);
+     return res.status(400).send("User Already Exist. Please Log-in"); 
+    n}
+
+    // password hashing
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(req.body.password, salt);
+
+    // save user
     const userData = new User({
-        ...req.body, //making the copy of req.body
-        password:hashedPassword // this one I need to update
-    })
-    await userData.save() // Saving to DB
-    res.send({user:userData,message:"Successfully signed in"}) //either object or text, cannot send both. 
-// }catch(e){
-//     res.send("Some Internal Error Occurred")
-// }
-})
+      ...req.body,
+      password: hashedPassword
+    });
+    await userData.save();
+
+    // if student role, also save in Student collection
+    if (req.body.role === "student") {
+      const studentData = new Student({
+        _id: userData._id,              // studentId = userId
+        username: req.body.username,    
+        studentName: req.body.username, 
+        birthdate: req.body.birthdate,  
+        email: req.body.email,
+        phoneNumber: req.body.phoneNumber,
+        gender: req.body.gender,
+        password: hashedPassword,
+        role: req.body.role
+      });
+      await studentData.save();
+    }
+
+    res.status(200).json({ 
+      success: true,
+      user: userData, 
+      message: "Successfully registered a new user" 
+    });
+
+  } catch (e) {
+    console.error(e);
+    res.status(500).send("Some Internal Error Occurred");
+  }
+});
+
+
+// student & user Id should be same
 
 //Sign In
 router.post('/signin',async(req,res)=>{
-    try{
+    // try{
         let user = await User.findOne({
         //checking by user detail with email
         //username coming from postman which you entering
@@ -74,9 +104,10 @@ router.post('/signin',async(req,res)=>{
             res.status(401).send({
                 message:"Your login credentials are incorrect,kindly check and re-enter!"
             })
-    }catch(e){
-            res.status(500).send({message:"Some Internal Error"})
-    }})
+    // }catch(e){
+    //         res.status(500).send({message:"Some Internal Error"})
+    // }
+})
 
     //UPDATE the profile photo
 //  router.post('/users/profile/upload/image',auth,upload.single('avatar'),async(req,res)=>{
