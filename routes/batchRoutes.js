@@ -75,14 +75,10 @@ router.post("/addbatch", auth, async (req, res) => {
 // routes/batchRoutes.js
 router.get("/nextbatchno", auth, async (req, res) => {
   try {
-    // find the last batch sorted by creation date descending
     const lastBatch = await Batch.findOne().sort({ createdAt: -1 });
-
-    let nextBatchNo = "BATCH-001"; // default for first batch
-
-    if (lastBatch && lastBatch.batchNo) {
-      // extract numeric part safely
-      const parts = lastBatch.batchNo.split("-");
+    let nextBatchNo = "BATCH-001";
+    if (lastBatch && lastBatch.batchNumber) {
+      const parts = lastBatch.batchNumber.split("-");
       const lastNumber = parseInt(parts[1], 10);
 
       if (!isNaN(lastNumber)) {
@@ -91,12 +87,13 @@ router.get("/nextbatchno", auth, async (req, res) => {
       }
     }
 
-    return res.status(200).send({ nextBatchNo });
+    res.status(200).send({ nextBatchNo });
   } catch (err) {
     console.error("Error fetching next batch number:", err);
-    return res.status(500).send({ message: "Internal Server Error" });
+    res.status(500).send({ message: "Internal Server Error" });
   }
 });
+
 
 
 //update

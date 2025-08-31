@@ -18,7 +18,6 @@ router.post('/addadmission',auth,async(req,res)=>{
         const admissionDetail = new Admission ({
             ...req.body, // makingg the copy of req. body
              studentId:req.body.studentId, // get 1 single student.
-        
             admissionYear:year,
             admissionMonth:month,
         })
@@ -30,7 +29,7 @@ router.post('/addadmission',auth,async(req,res)=>{
         //courseName
         getStudent.courseName = admissionDetail.courseName
         //preferredCourses
-        getStudent.preferredCourses = admissionDetail.preferredCourses
+        // getStudent.preferredCourses = admissionDetail.preferredCourses
         //courseId
         getStudent.courseId = admissionDetail.courseId
         //admissionId

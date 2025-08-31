@@ -26,7 +26,6 @@ router.post('/signup', async (req, res) => {
 if (user) { console.log("User is found", req.body.email);
      return res.status(400).send("User Already Exist. Please Log-in"); 
     n}
-
     // password hashing
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(req.body.password, salt);
@@ -53,7 +52,6 @@ if (user) { console.log("User is found", req.body.email);
       });
       await studentData.save();
     }
-
     res.status(200).json({ 
       success: true,
       user: userData, 
@@ -71,7 +69,7 @@ if (user) { console.log("User is found", req.body.email);
 
 //Sign In
 router.post('/signin',async(req,res)=>{
-    // try{
+    try{
         let user = await User.findOne({
         //checking by user detail with email
         //username coming from postman which you entering
@@ -104,9 +102,9 @@ router.post('/signin',async(req,res)=>{
             res.status(401).send({
                 message:"Your login credentials are incorrect,kindly check and re-enter!"
             })
-    // }catch(e){
-    //         res.status(500).send({message:"Some Internal Error"})
-    // }
+    }catch(e){
+            res.status(500).send({message:"Some Internal Error"})
+    }
 })
 
     //UPDATE the profile photo
