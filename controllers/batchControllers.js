@@ -1,4 +1,4 @@
-const Batch = require('../model/batchNumberModel')
+const Batch = require('../model/batchModel')
 
 
 const getAllBatches = async (req,res) => {

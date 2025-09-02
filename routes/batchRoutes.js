@@ -1,5 +1,5 @@
 const express = require('express')
-const Batch = require('../model/batchNumberModel')
+const Batch = require('../model/batchModel')
 const router = express.Router()
 const { auth } = require("../middleware/auth");
 const { getAllBatches, addBatch, nextBatchNumber, updateBatch, deleteBatch } = require("../controllers/batchControllers");
