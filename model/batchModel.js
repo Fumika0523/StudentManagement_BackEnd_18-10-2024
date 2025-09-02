@@ -9,6 +9,7 @@ const batchSchema = new mongoose.Schema({
     location:{type:String,required:true},//online/offline
     sessionTime:{type:String,required:true},
     fees:{type:Number,required:true},
+    seq:{type:String,required:true}
 },{
     timestamps:true
 })
