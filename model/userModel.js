@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
         type:String,
         enum:["admin","user","manager","supportTeam","testingTeam","guest","student"],
         required:true,
-        default:"user"
+        // default:"user"  
     }
 },{
     timestamps:true //registered time

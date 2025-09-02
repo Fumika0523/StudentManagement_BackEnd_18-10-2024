@@ -178,4 +178,29 @@ router.delete('/users/profile',auth,async(req,res)=>{
         res.send({message:"Some Internal Error"})
     }
 })
+
+//Sample
+
+router.get('/dashboard',auth,authorizationRole("admin"),async(req,res)=>{
+    try{
+        res.send("Welcome to Dashboard,accessed by Admin")
+    }catch(e){
+        res.send({message:"Some internal error"})
+    }
+})
+
+
+router.get('/payment',auth,authorizationRole("student"),async(req,res)=>{
+    try{
+        res.send({
+            message:"Welcome to Payment,accessed by Student",
+            user:req.user.username,
+            role:req.user.role
+         } )
+    }catch(e){
+        res.send({message:"Some internal error"})
+    }
+})
+
+
 module.exports = router

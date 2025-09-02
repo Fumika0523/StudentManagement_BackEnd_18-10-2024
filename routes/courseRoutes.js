@@ -1,7 +1,7 @@
 const Course = require('../model/courseModel')
 const express = require('express')
 const router = express.Router()
-const {auth} = require('../middleware/auth')
+const {auth,authorizationRole} = require('../middleware/auth')
 
 
 //add
@@ -63,5 +63,7 @@ router.delete('/deletecourse/:id',async(req,res)=>{
         res.send({message:"Some Internal Error"})
     }
 })
+
+
 
 module.exports = router

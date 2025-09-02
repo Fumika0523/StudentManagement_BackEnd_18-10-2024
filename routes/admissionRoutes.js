@@ -2,11 +2,11 @@ const Admission = require('../model/admissionModel')
 const Student = require('../model/studentModel')
 const express = require('express')
 const router = express.Router()
-const {auth} = require ('../middleware/auth')
+const {auth,authorizationRole} = require ('../middleware/auth')
 
 //work with studentID
-//post
-router.post('/addadmission',auth,async(req,res)=>{
+
+router.post('/addadmission',authorizationRole("admin"),async(req,res)=>{
     try{
     //object destructuring
         console.log("Add Addmission Route")
@@ -58,7 +58,7 @@ router.post('/addadmission',auth,async(req,res)=>{
 //Table should be filled in View Student, prefered course in Student Model
 
 //get (all)
-router.get('/alladmission',async(req,res)=>{
+router.get('/alladmission',authorizationRole("admin"),async(req,res)=>{
     // without Auth
     // const getAllAsmission = await Admission.find()
     // res.send(getAllAsmission)
@@ -76,7 +76,7 @@ router.get('/alladmission',async(req,res)=>{
     })
 
 //get (single)
-router.get('/admission/:id',auth,async(req,res)=>{
+router.get('/admission/:id',authorizationRole("admin"),async(req,res)=>{
     const admissionById = await Admission.findById(
         {_id:req.params.id}
     )
@@ -110,7 +110,7 @@ router.get('/admission/:id',auth,async(req,res)=>{
 
 
 //put (update) (edit >> front-end)
-router.put('/updateadmission/:id',async(req,res)=>{
+router.put('/updateadmission/:id',authorizationRole("admin"),async(req,res)=>{
     //Without Auth
     // const updateAdmission = await Admission.findOneAndUpdate(req.params.id)
 
@@ -127,7 +127,7 @@ router.put('/updateadmission/:id',async(req,res)=>{
 })
 
 //delete
-router.delete('/deleteadmission/:id',async(req,res)=>{
+router.delete('/deleteadmission/:id',authorizationRole("admin"),async(req,res)=>{
     // try{
         console.log("Delete Admission by ID",req.params.id)
         const deleteAdmission = await Admission.findOneAndDelete({
