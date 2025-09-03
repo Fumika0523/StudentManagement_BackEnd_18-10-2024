@@ -1,6 +1,7 @@
 const User = require('../model/userModel')
 const Student = require('../model/studentModel')
-
+const bcrypt = require('bcryptjs')
+const sharp = require('sharp')
 
 const signUp = async (req, res) => {
   try {
