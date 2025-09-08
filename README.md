@@ -71,3 +71,24 @@ node_module & .env is mentioned or not
 
 //complete user routes >> test with postman
 //create a dashboard : https://startbootstrap.com/previews/sb-admin-2#google_vignette
+
+<!--  const nextBatchNumber = async (req, res) => {
+try {
+     const lastBatch = await Batch.findOne().sort({ createdAt: -1 });
+     let nextBatchNo = "BATCH-001";
+     if (lastBatch && lastBatch.batchNumber) {
+       const parts = lastBatch.batchNumber.split("-");
+       const lastNumber = parseInt(parts[1], 10);
+
+       if (!isNaN(lastNumber)) {
+         const newNumber = lastNumber + 1;
+         nextBatchNo = `BATCH-${String(newNumber).padStart(3, "0")}`;
+       }
+     }
+     res.status(200).send({ nextBatchNo });
+   } catch (err) {
+     console.error("Error fetching next batch number:", err);
+     res.status(500).send({ message: "Internal Server Error" });
+   }
+ } -->
+

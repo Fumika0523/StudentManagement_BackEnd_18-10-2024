@@ -9,7 +9,9 @@ const batchSchema = new mongoose.Schema({
     location:{type:String,required:true},//online/offline
     sessionTime:{type:String,required:true},
     fees:{type:Number,required:true},
-    seq:{type:String,required:true}
+    seq:{type:Number},
+    assignedStudent:{type:Number},
+    status:{type:String,required:true,default:"active"}
 },{
     timestamps:true
 })
@@ -18,12 +20,3 @@ const Batch = mongoose.model("Batch",batchSchema)
 
 module.exports = Batch
 
-
-//batch no.
-//session type
-//course name
-//target student size 
-//weekdays or weekend
-//offline or online
-//session time
-//fees

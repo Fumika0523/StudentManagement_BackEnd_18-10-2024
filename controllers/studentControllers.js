@@ -1,5 +1,33 @@
 const Student = require('../model/studentModel')
 
+const addStudent = async(req,res)=>{
+try{
+    let student = await Student.findOne({
+        $or:[
+            {email:req.body.email},
+            {phoneNumber:req.body.phoneNumber}
+        ]
+    })
+console.log(student)
+console.log(req.body)
+if(student){
+    console.log("Student is found",req.body.email)
+    return res.send("Student Already Exist. Please Log-in")
+}
+//password hashing
+const salt = await bcrypt.genSalt(10)
+const hashedPassword = await bcrypt.hash(req.body.password,salt)// using this round, combined with a password >> create a new pw
+const studentData = new Student({
+    ...req.body,
+    password:hashedPassword
+})
+await studentData.save()
+res.send({student:studentData,message:"Successfully registred"})
+    }catch(e){
+        res.send("Some Internal Error Occurred")
+    }
+}
+
 const signIn = async(req,res)=>{
     try{
         let student = await Student.findOne({
@@ -58,7 +86,6 @@ const singleStudent = async(req,res)=>{
 }
 }
 
-
 const updateStudent = async(req,res)=>{
     const updateStudent = await Student.findOneAndUpdate({_id:req.params.id},req.body,{new:true, runValidators:true})
     try{
@@ -87,4 +114,4 @@ const deleteStudent = async(req,res)=>{
     }
 }
 
-module.exports = {signIn, getAllStudent,singleStudent, updateStudent,deleteStudent}
+module.exports = {signIn, getAllStudent,singleStudent, updateStudent,deleteStudent, addStudent}

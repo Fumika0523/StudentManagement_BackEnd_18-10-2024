@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs')
 const sharp = require('sharp')
 const {auth, authorizationRole} = require ('../middleware/auth')
 const Student = require('../model/studentModel')
-const {signUp,signIn, getProfile, updateProfile, deleteProfile,dashboard,payment} = require('../controllers/userController')
+const {signUp,signIn, getProfile, updateProfile, deleteProfile,dashboard,payment, uploadProfilePhoto} = require('../controllers/userController')
 
 router.get("/test",authorizationRole,(req,res)=>{
     console.log("test")
@@ -18,26 +18,9 @@ router.post('/signup',signUp);
 //Sign In
 router.post('/signin',signIn)
 
-    //UPDATE the profile photo
-//  router.post('/users/profile/upload/image',auth,upload.single('avatar'),async(req,res)=>{
-//         try{
-//             const buffer = await sharp (req.file.buffer).resize({width:100,height:100}).png().toBuffer()
-//             //req.user.avatar=req.file.buffer // directly updating
-//             req.user.avatar = buffer
-//             await req.user.save()
-//             if(buffer){
-//             res.send({message:"File Uploaded Successfully"})
-//         }
-//             //req.file.buffer >> hold the binary data
-//         }catch(e){
-//             console.log(e)
-//         }
-//     },(error,req,res,next)=>{
-//         res.send({showError:error.message})
-//         })
-//     })
+//UPDATE the profile photo
+router.post('/users/profile/upload/image', auth, uploadProfilePhoto)
 
- 
 // GET
 router.get('/users/profile',auth,getProfile)
 

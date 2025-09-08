@@ -50,19 +50,7 @@ try{
 
 const addBatch = async (req, res) => {
   try {
-        const year = new Date().getFullYear()
-    const test = await Batch.findOneAndUpdate(
-            {batchNumber:`batch-${year}`},
-            {$inc:{seq:1}},
-            {new:true,upsert:true}
-        )
-        console.log(String(test.seq).padStart(4,"0"))
-        // console.log(test)
-
-    const batchDetail = new Batch({
-      ...req.body,
-      batchNo: newBatchNo,
-    });
+    const batchDetail = new Batch(req.body);
     if(!batchDetail){
       res.status(401).send({message:"Unable to add your batch"})
      }
@@ -76,18 +64,17 @@ const addBatch = async (req, res) => {
 
 const nextBatchNumber = async (req, res) => {
   try {
-    const lastBatch = await Batch.findOne().sort({ createdAt: -1 });
-    let nextBatchNo = "BATCH-001";
-    if (lastBatch && lastBatch.batchNumber) {
-      const parts = lastBatch.batchNumber.split("-");
-      const lastNumber = parseInt(parts[1], 10);
-
-      if (!isNaN(lastNumber)) {
-        const newNumber = lastNumber + 1;
-        nextBatchNo = `BATCH-${String(newNumber).padStart(3, "0")}`;
-      }
-    }
-    res.status(200).send({ nextBatchNo });
+      const year = new Date().getFullYear()
+      const generateSequence = await Batch.findOneAndUpdate(
+            {batchNumber:`batch-${year}`}, //dummy trick
+            {$inc:{seq:1}},
+            {new:true,upsert:true}
+        )
+      // console.log(String(test.seq).padStart(4,"0"))
+      //  console.log(test.seq,text.batchNumber)
+      //  console.log(`${year}-` +String(generateSequence.seq).padStart(4,"0"))
+       const newBatch= `${year}-` +String(generateSequence.seq).padStart(4,"0")
+       res.status(201).send({message:"New Batch successfully generated! ",newBatch })
   } catch (err) {
     console.error("Error fetching next batch number:", err);
     res.status(500).send({ message: "Internal Server Error" });

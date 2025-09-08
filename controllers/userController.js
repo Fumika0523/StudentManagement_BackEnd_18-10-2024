@@ -68,7 +68,6 @@ const signIn = async(req,res)=>{
             ({
                 message:"Username Not Found"
             })}
-
             //checking by user with password
             const isMatch = await bcrypt.compare(req.body.password,user.password)// from postman , from the email is matched?
             if(!isMatch){
@@ -81,6 +80,7 @@ const signIn = async(req,res)=>{
                     return res.status(200).send({
                         message:"You have successfully Signed-in!!!",
                         user:user,
+                        role: user.role,
                         token:token,
                     })
                 }
@@ -160,4 +160,36 @@ const payment = async(req,res)=>{
         res.send({message:"Some internal error"})
     }
 }
-module.exports ={signUp, signIn,getProfile, updateProfile,deleteProfile, dashboard, payment}
+
+const uploadProfilePhoto =  async (req, res) => {
+    try {
+        // Check if file was uploaded
+        if (!req.file) {
+            return res.status(400).send({ error: "No file uploaded" });
+        }
+
+        // Process image with sharp
+        const buffer = await sharp(req.file.buffer)
+            .resize({ width: 100, height: 100 })
+            .png()
+            .toBuffer();
+
+        // Save processed image to user
+        req.user.avatar = buffer;
+        await req.user.save();
+
+        res.status(200).send({ message: "File Uploaded Successfully" });
+
+    } catch (error) {
+        console.error("Error uploading avatar:", error);
+
+        // Handle multer-specific errors or general errors
+        if (error instanceof multer.MulterError) {
+            return res.status(400).send({ error: error.message });
+        }
+
+        res.status(500).send({ error: "Failed to upload image" });
+    }
+}
+
+module.exports ={signUp, signIn,getProfile, updateProfile,deleteProfile, dashboard, payment, uploadProfilePhoto}
