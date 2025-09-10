@@ -29,10 +29,10 @@ const auth = async(req,res,next)=>{
 const authorizationRole=(role)=>{
     //req >>  a data send from front-end
     return(req,res,next)=>{
-        console.log(req.user.role)
-        if(!req.user || req.user.role){
+      //  console.log(req.user.role)
+        if(!req.user || !req.user.role){
             console.log("Check role")
-            return;
+             return;
         }
             // res.send({"role":"admin"})
             if(!req.user || req.user.role !==role){

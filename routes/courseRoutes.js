@@ -5,16 +5,16 @@ const {auth,authorizationRole} = require('../middleware/auth')
 const {addCourse, allCourse, updateCourse, deleteCourse} = require('../controllers/courseControllers')
 
 //add
-router.post('/addcourse',authorizationRole("admin"),addCourse)
+router.post('/addcourse',auth,authorizationRole("admin"),addCourse)
 
 //get (All)
-router.get('/allcourse',authorizationRole("admin"),allCourse)
+router.get('/allcourse',auth,authorizationRole("admin"),allCourse)
 
 //UPDATE
-router.put('/updatecourse/:id',authorizationRole("admin"),updateCourse)
+router.put('/updatecourse/:id',auth,authorizationRole("admin"),updateCourse)
 
 //DELETE
-router.delete('/deletecourse/:id',authorizationRole("admin"),deleteCourse)
+router.delete('/deletecourse/:id',auth,authorizationRole("admin"),deleteCourse)
 
 
 module.exports = router

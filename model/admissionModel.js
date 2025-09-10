@@ -4,7 +4,7 @@ const admissionSchema = new mongoose.Schema({
     courseName:{type:String,required:true},
     studentName:{type:String,required:true},
     admissionSource:{type:String,required:true},
-    admissionFee:{type:Number,required:true},
+    admissionFee:{type:Number,required:true},//courseFee
     admissionDate:{type:Date,required:true},
     admissionYear:{type:Number},
     admissionMonth:{type:String},
@@ -18,7 +18,8 @@ const admissionSchema = new mongoose.Schema({
         ref:"Course",
         required:true
     },
-      admissionId: { type: mongoose.Schema.Types.ObjectId }
+      admissionId: { type: mongoose.Schema.Types.ObjectId },
+      batchNumber:{type:String,},
 },{
     timestamps:true
 })

@@ -2,15 +2,15 @@ const Batch = require('../model/batchModel')
 
 
 const getAllBatches = async (req,res) => {
-try{
+// try{
     console.log(req.token)
     const getBatchData = await Batch.find()
     if(!getBatchData){
         res.send({message:"The Student Data canot be found"})
     }res.send({batchData:getBatchData})
-}catch(e){
-    res.send({message:"Some Internal Error"})
-}
+// }catch(e){
+//     res.send({message:"Some Internal Error"})
+// }
 }
 // increment operator
 
@@ -74,6 +74,7 @@ const nextBatchNumber = async (req, res) => {
       //  console.log(test.seq,text.batchNumber)
       //  console.log(`${year}-` +String(generateSequence.seq).padStart(4,"0"))
        const newBatch= `${year}-` +String(generateSequence.seq).padStart(4,"0")
+       console.log("newBatch",newBatch)
        res.status(201).send({message:"New Batch successfully generated! ",newBatch })
   } catch (err) {
     console.error("Error fetching next batch number:", err);

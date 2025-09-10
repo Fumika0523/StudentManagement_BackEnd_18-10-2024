@@ -3,19 +3,19 @@ const Student = require('../model/studentModel')
 const express = require('express')
 const router = express.Router()
 const {auth,authorizationRole} = require ('../middleware/auth')
-const {addAdmission, getAllAdmission, getSingleAdmission, updateAdmission, deletAdmission} = require('../controllers/admissionControllers')
+const {addAdmission, getAllAdmission, getSingleAdmission, updateAdmission, deleteAdmission} = require('../controllers/admissionControllers')
 
 
 //work with studentID
 
-router.post('/addadmission',authorizationRole("admin"),addAdmission)
+router.post('/addadmission',auth,authorizationRole("admin"),addAdmission)
 //Table should be filled in View Student, prefered course in Student Model
 
 //get (all)
-router.get('/alladmission',authorizationRole("admin"),getAllAdmission)
+router.get('/alladmission',auth,authorizationRole("admin"),getAllAdmission)
 
 //get (single)
-router.get('/admission/:id',authorizationRole("admin"),getSingleAdmission)
+router.get('/admission/:id',auth,authorizationRole("admin"),getSingleAdmission)
 
     //Without Auth
     // const getAdmission = await Admission.findById(req.params.id)
@@ -42,13 +42,13 @@ router.get('/admission/:id',authorizationRole("admin"),getSingleAdmission)
 
 
 //put (update) (edit >> front-end)
-router.put('/updateadmission/:id',authorizationRole("admin"),updateAdmission)
+router.put('/updateadmission/:id',auth,authorizationRole("admin"),updateAdmission)
 
 //delete
-router.delete('/deleteadmission/:id',authorizationRole("admin"),deletAdmission)
+router.delete('/deleteadmission/:id',auth,authorizationRole("admin"),deleteAdmission)
 
 //get monthly earning
-router.get('/earnings',async(req,res)=>{
+router.get('/earnings',auth,async(req,res)=>{
 //giving you are current year (2024)
 const currentYear = new Date().getFullYear()
 console.log(currentYear)

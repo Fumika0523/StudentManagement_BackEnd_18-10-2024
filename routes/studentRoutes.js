@@ -3,7 +3,7 @@ const express = require('express')
 const router = express.Router()
 const bcrypt = require ('bcryptjs')
 const sharp = require('sharp')
-const {auth} = require ('../middleware/auth')
+const {auth,authorizationRole} = require ('../middleware/auth')
 const {signIn, getAllStudent,singleStudent ,updateStudent,deleteStudent, addStudent} = require('../controllers/studentControllers')
 
 //POST
@@ -14,15 +14,15 @@ router.post('/registerstudent',addStudent)
 router.post('/loginstudent',signIn)
 
 //get (All)
-router.get('/allstudent',auth,getAllStudent)
+router.get('/allstudent',auth,authorizationRole("admin"),getAllStudent)
 
 //get 1 Student
-router.get('/student/:id',auth,singleStudent)
+router.get('/student/:id',auth,authorizationRole("admin"),singleStudent)
 
 //update
-router.put('/updatestudent/:id',updateStudent)
+router.put('/updatestudent/:id',auth,authorizationRole("admin"),updateStudent)
 
 //delete
-router.delete('/deletestudent/:id',deleteStudent)
+router.delete('/deletestudent/:id',auth,authorizationRole("admin"),deleteStudent)
 
     module.exports= router

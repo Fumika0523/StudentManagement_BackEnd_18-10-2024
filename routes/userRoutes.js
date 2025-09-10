@@ -28,7 +28,7 @@ router.get('/users/profile',auth,getProfile)
 router.put('/users/profile',auth,updateProfile)
 
 //DELETE
-router.delete('/users/profile',auth,deleteProfile)
+router.delete('/users/profile',auth,authorizationRole("admin"),deleteProfile)
 
 //Sample
 router.get('/dashboard',auth,authorizationRole("admin"),dashboard)
