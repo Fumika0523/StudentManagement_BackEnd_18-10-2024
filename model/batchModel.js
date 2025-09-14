@@ -11,7 +11,8 @@ const batchSchema = new mongoose.Schema({
     fees:{type:Number,required:true},
     seq:{type:Number},
     assignedStudentCount:{type:Number,default:0},
-    status:{type:String,required:true,default:"active"}
+    status:{type:String,required:true,default:"active"},
+    startDate:{type:Date,required:true}
 },{
     timestamps:true
 })

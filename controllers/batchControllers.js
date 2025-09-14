@@ -111,18 +111,30 @@ const nextBatchNumber = async (req, res) => {
 };
 
 
-const updateBatch = async(req,res)=>{
-    const updateBatch = await Batch.findOneAndUpdate({_id:req.params.id},req.body,{new:true, runValidators:true})
-     try{
-        console.log(updateBatch)
-        if(!updateBatch){
-        return res.send({message:"Can't update the Batch, please check again"})
-         }
-         res.send({message:"The Batch has been successfully updated",updateBatch})
-    }catch(e){
-        res.send({message:"Some Internal Error Occur"})
+const updateBatch = async (req, res) => {
+  try {
+    const batch = await Batch.findOneAndUpdate(
+      { _id: req.params.id },
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    if (!batch) {
+      return res.status(404).send({
+        message: "Can't update the Batch, please check the ID again",
+      });
     }
-}
+
+    res.status(200).send({
+      message: "The Batch has been successfully updated",
+      batch,
+    });
+  } catch (e) {
+    console.error("Error updating Batch:", e);
+    res.status(500).send({ message: "Some Internal Error Occurred" });
+  }
+};
+
 
 const deleteBatch = async(req,res)=>{
     try{
