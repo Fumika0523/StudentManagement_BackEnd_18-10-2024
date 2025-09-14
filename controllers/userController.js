@@ -95,8 +95,8 @@ const signIn = async(req,res)=>{
 
 const getProfile =async(req,res)=>{
     try{
-        console.log(req.token)
-       console.log(req.user)
+        //console.log(req.token)
+       //console.log(req.user)
         const getProfile = await User.findById(req.user._id)
         if(!getProfile){
             res.send({
@@ -127,8 +127,8 @@ const updateProfile = async(req,res)=>{
 
 const deleteProfile = async(req,res)=>{
     try{
-        console.log(req.token)
-        console.log(req.user._id)
+        //console.log(req.token)
+        //console.log(req.user._id)
         console.log("DELETE PROFILE ID",req.user._id)
         const deleteProfile = await User.findByIdAndDelete(req.user._id)
         if(!deleteProfile){

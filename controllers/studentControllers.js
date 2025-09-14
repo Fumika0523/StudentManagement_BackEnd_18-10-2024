@@ -62,7 +62,7 @@ const signIn = async(req,res)=>{
 
 const getAllStudent = async(req,res)=>{
     try{
-        console.log(req.token)
+        //console.log(req.token)
         const getStudentData = await Student.find()
         if(!getStudentData){
             res.send({message:"The Student Data cannot b found"})

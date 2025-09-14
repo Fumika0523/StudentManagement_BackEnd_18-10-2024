@@ -18,11 +18,11 @@ const addAdmission = async (req, res) => {
 
     // const dateObj = new Date(admissionDate); creates a JavaScript Date object by parsing admissionDate. dateObj is then a date/time object you can query (year, month, day, timestamp, etc.) or store.
     const dateObj = new Date(admissionDate);
-        console.log("dateObj",dateObj)
+       // console.log("dateObj",dateObj)
     const year = dateObj.getFullYear();
-        console.log("year",year)
+        //console.log("year",year)
     const month = dateObj.toLocaleString("default", { month: "short" });
-         console.log("month",month)
+         //console.log("month",month)
 
     // Create admission detail
     const admissionDetail = new Admission({
@@ -70,7 +70,7 @@ const addAdmission = async (req, res) => {
 const getAllAdmission = async(req,res)=>{
     // With Auth 
      try{
-        console.log(req.token)
+     //   console.log(req.token)
         const getAdmissionData = await Admission.find()
         if(!getAdmissionData){
             res.send({message:"The Admission Data canot be found"})

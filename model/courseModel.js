@@ -6,6 +6,7 @@ const courseSchema = new mongoose.Schema({
     courseTime:{type:String,required:true}, //morning / afternoon, evening
     courseAvailability:{type:String,required:true}, // Allday, Weekdays, Weekend
     courseDuration:{type:String,required:true}, //2hrs, 3hrs, 5hrs
+    noOfDays:{type:String,required:true},
     courseFee:{type:Number,required:true}
 },{
     timestamps:true

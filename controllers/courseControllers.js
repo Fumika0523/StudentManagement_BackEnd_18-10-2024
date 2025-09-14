@@ -1,8 +1,8 @@
 const Course = require('../model/courseModel')
 
 const addCourse = async(req,res)=>{
-    console.log(req.body)
-    console.log(req.token)
+    //console.log(req.body)
+    //console.log(req.token)
     try{
         // console.log(req.token)
         const courseDetail = new Course(req.body)
