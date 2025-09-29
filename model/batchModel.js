@@ -14,7 +14,7 @@ const batchSchema = new mongoose.Schema({
     status:{type:String,required:true,default:"active"},
     startDate:{type:Date,required:true}
 },{
-    timestamps:true
+    timestamps: true
 })
 
 const Batch = mongoose.model("Batch",batchSchema)

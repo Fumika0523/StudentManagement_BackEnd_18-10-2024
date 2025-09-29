@@ -10,7 +10,7 @@ const studentRoutes = require('./routes/studentRoutes')
 const admissionRoutes = require('./routes/admissionRoutes')
 const courseRoutes = require('./routes/courseRoutes')
 const batchRoutes = require('./routes/batchRoutes')
-
+const dashboardRoutes = require('./routes/dashboardRoute')
 
 connection()
 
@@ -25,6 +25,7 @@ app.use(studentRoutes)
 app.use(admissionRoutes)
 app.use(courseRoutes)
 app.use(batchRoutes)
+app.use(dashboardRoutes)
 
 app.listen(Port,()=>{
     console.log(`Server started at Port no.- ${Port}`)

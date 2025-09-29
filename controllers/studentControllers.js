@@ -1,7 +1,9 @@
 const Student = require('../model/studentModel')
+const bcrypt = require ('bcryptjs')
+const sharp = require('sharp')
 
 const addStudent = async(req,res)=>{
-try{
+//try{
     let student = await Student.findOne({
         $or:[
             {email:req.body.email},
@@ -23,9 +25,9 @@ const studentData = new Student({
 })
 await studentData.save()
 res.send({student:studentData,message:"Successfully registred"})
-    }catch(e){
-        res.send("Some Internal Error Occurred")
-    }
+    // }catch(e){
+    //     res.send("Some Internal Error Occurred")
+    // }
 }
 
 const signIn = async(req,res)=>{

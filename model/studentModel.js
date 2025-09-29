@@ -24,7 +24,7 @@ const studentSchema = new mongoose.Schema({
             required:false
         }, //preferred course
 },{
-    timeStamps:true // registered time
+    timestamps: true
 })
 
 studentSchema.methods.generateAuthToken = async function(req,res){
