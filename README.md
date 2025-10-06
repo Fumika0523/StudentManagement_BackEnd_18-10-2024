@@ -122,3 +122,6 @@ const nextBatchNumber = async (req, res) => {
   }
 }
  -->
+
+
+ <!-- BatchNumber manually should not be static -->
