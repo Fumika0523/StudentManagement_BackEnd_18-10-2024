@@ -20,6 +20,7 @@ const admissionSchema = new mongoose.Schema({
     },
       admissionId: { type: mongoose.Schema.Types.ObjectId },
       batchNumber:{type:String,},
+      status:{type:String}
 },{
     timestamps:true
 })
