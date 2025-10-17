@@ -14,15 +14,15 @@ router.post('/registerstudent',addStudent)
 router.post('/loginstudent',signIn)
 
 //get (All)
-router.get('/allstudent',auth,authorizationRole("admin"),getAllStudent)
+router.get('/allstudent',auth,authorizationRole(["admin", "staff"]),getAllStudent)
 
 //get 1 Student
-router.get('/student/:id',auth,authorizationRole("admin"),singleStudent)
+router.get('/student/:id',auth,authorizationRole(["admin", "staff"]),singleStudent)
 
 //update
-router.put('/updatestudent/:id',auth,authorizationRole("admin"),updateStudent)
+router.put('/updatestudent/:id',auth,authorizationRole(["admin", "staff"]),updateStudent)
 
 //delete
-router.delete('/deletestudent/:id',auth,authorizationRole("admin"),deleteStudent)
+router.delete('/deletestudent/:id',auth,authorizationRole(["admin", "staff"]),deleteStudent)
 
     module.exports= router
