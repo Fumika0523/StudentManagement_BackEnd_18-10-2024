@@ -31,7 +31,7 @@ router.put('/users/profile',auth,updateProfile)
 router.delete('/users/profile',auth,authorizationRole(["admin" , "staff"]),deleteProfile)
 
 //Sample
-router.get('/dashboard',auth,authorizationRole(["admin" , "staff"]),dashboard)
+router.get('/dashboard',auth,authorizationRole("admin" ),dashboard)
 
 
 router.get('/payment',auth,authorizationRole("student"),payment)
