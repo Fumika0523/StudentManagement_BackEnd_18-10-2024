@@ -15,7 +15,7 @@ const signUp = async (req, res) => {
 
 if (user) { console.log("User is found", req.body.email);
      return res.status(400).send("User Already Exist. Please Log-in"); 
-    n}
+    }
     // password hashing
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(req.body.password, salt);

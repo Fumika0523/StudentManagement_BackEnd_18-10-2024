@@ -1,5 +1,6 @@
-const Batch = require('../model/batchModel')
-
+const sendEmail = require("../utils/sendEmail");
+const Batch = require("../model/batchModel");
+const User = require("../model/userModel");
 
 const getAllBatches = async (req,res) => {
  try{
@@ -63,7 +64,6 @@ const addBatch = async (req, res) => {
   }
 };
 
-
 // const nextBatchNumber = async (req, res) => {
 //   try {
 //       const year = new Date().getFullYear()
@@ -110,7 +110,6 @@ const nextBatchNumber = async (req, res) => {
   }
 };
 
-
 const updateBatch = async (req, res) => {
   try {
     const batch = await Batch.findOneAndUpdate(
@@ -135,7 +134,6 @@ const updateBatch = async (req, res) => {
   }
 };
 
-
 const deleteBatch = async(req,res)=>{
     try{
         console.log("Delete Batch by ID",req.params.id)
@@ -151,6 +149,158 @@ const deleteBatch = async(req,res)=>{
         }
 }
 
+const approveBatch = async (req, res) => {
+  try {
+    const batch = await Batch.findById(req.params.id);
+    if (!batch) return res.status(404).send({ message: "Batch not found" });
+
+    const adminUser = req.user; // from auth middleware
+
+    // 🔒 PROTECT AGAINST DOUBLE APPROVAL (ADD THIS)
+    if (batch.approvalStatus === "approved" || batch.approvalStatus === "declined") {
+      return res
+        .status(400)
+        .send({ message: "This approval link is no longer active." });
+    }
+
+    // Update batch
+    const updated = await Batch.findByIdAndUpdate(
+      req.params.id,
+      {
+        isApproved: true,
+        approvalStatus: "approved",
+        approvedBy: adminUser.username,
+        approvedAt: new Date()
+      },
+      { new: true }
+    );
+
+    // Send email to staff who requested
+    if (batch.requestedByEmail) {
+      await sendEmail({
+        to: batch.requestedByEmail,
+        subject: "Your Batch Has Been Approved",
+        html: `
+          <p>Your batch <strong>${batch.batchNumber}</strong> has been approved by <strong>${adminUser.username}</strong>.</p>
+          <p>Please complete the batch.</p>
+          <p><a href="${process.env.FRONTEND_URL}/batchData">Go to Batch Page</a></p>
+        `
+      });
+    }
+
+    res.send({ message: "Batch approved", batch: updated });
+
+  } catch (e) {
+    console.log("Approve error:", e);
+    res.status(500).send({ message: "Internal error approving batch" });
+  }
+};
+
+const declineBatch = async (req, res) => {
+  try {
+    const batch = await Batch.findById(req.params.id);
+    if (!batch) return res.status(404).send({ message: "Batch not found" });
+
+    const adminUser = req.user;
+
+    if (batch.approvalStatus === "approved" || batch.approvalStatus === "declined") {
+  return res
+    .status(400)
+    .send({ message: "This approval link is no longer active." });
+}
 
 
-module.exports = { getAllBatches, addBatch, nextBatchNumber, updateBatch, deleteBatch }
+    const updated = await Batch.findByIdAndUpdate(
+      req.params.id,
+      {
+        isApproved: false,
+        approvalStatus: "declined"
+      },
+      { new: true }
+    );
+
+    // Notify staff
+    if (batch.requestedByEmail) {
+      await sendEmail({
+        to: batch.requestedByEmail,
+        subject: "Your Batch Approval Request Was Declined",
+        html: `
+          <p>Your batch <strong>${batch.batchNumber}</strong> was declined by <strong>${adminUser.username}</strong>.</p>
+        `
+      });
+    }
+
+    res.send({ message: "Batch declined", batch: updated });
+
+  } catch (e) {
+    console.log("Decline error:", e);
+    res.status(500).send({ message: "Internal error declining batch" });
+  }
+};
+
+
+const sendApprovalBatch = async (req, res) => {
+  try {
+    const { batchId, username } = req.body;
+
+    // Find staff user who is requesting
+    const staffUser = await User.findOne({ username });
+    if (!staffUser) {
+      return res.status(400).send({ message: "Requesting staff user not found" });
+    }
+
+    // Update batch
+    const batch = await Batch.findByIdAndUpdate(
+      batchId,
+      {
+        approvalStatus: "pending",
+        requestedBy: username,
+        requestedByEmail: staffUser.email
+      },
+      { new: true }
+    );
+
+    // Find all admins
+    const admins = await User.find({ role: "admin" });
+    if (!admins.length) {
+      return res.status(400).send({ message: "No admin users found" });
+    }
+
+    const adminEmails = admins.map(a => a.email);
+
+    // Email links
+    const approveUrl  = `${process.env.FRONTEND_URL}/approve?batchId=${batchId}&action=approve`;
+    const declineUrl  = `${process.env.FRONTEND_URL}/approve?batchId=${batchId}&action=decline`;
+
+    // Send emails to all admins
+    for (const email of adminEmails) {
+      await sendEmail({
+        to: email,
+        subject: "Batch Approval Request",
+        html: `
+          <p>Staff <strong>${username}</strong> is requesting approval for batch <strong>${batch.batchNumber}</strong>.</p>
+          <p><a href="${approveUrl}" style="padding:8px;background:green;color:white;border-radius:5px;">Approve</a></p>
+          <p><a href="${declineUrl}" style="padding:8px;background:red;color:white;border-radius:5px;">Decline</a></p>
+        `
+      });
+    }
+
+    res.send({ message: "Approval request sent." });
+
+  } catch (e) {
+    console.log("ERROR sending approval:", e);
+    res.status(500).send({ message: "Internal error sending approval" });
+  }
+};
+
+
+module.exports = {
+  getAllBatches,
+  addBatch,
+  nextBatchNumber,
+  updateBatch,
+  deleteBatch,
+  approveBatch,
+  declineBatch,
+  sendApprovalBatch
+};

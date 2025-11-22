@@ -2,7 +2,7 @@ const express = require('express')
 const Batch = require('../model/batchModel')
 const router = express.Router()
 const { auth, authorizationRole } = require("../middleware/auth");
-const { getAllBatches, addBatch, nextBatchNumber, updateBatch, deleteBatch } = require("../controllers/batchControllers");
+const { getAllBatches, addBatch, nextBatchNumber, updateBatch, deleteBatch,approveBatch,declineBatch,  sendApprovalBatch,} = require("../controllers/batchControllers");
 
 //get
 router.get('/allbatch',auth,authorizationRole(["admin", "staff"]),getAllBatches)
@@ -18,6 +18,18 @@ router.put('/updatebatch/:id',auth,authorizationRole(["admin", "staff"]),updateB
 
 //delete
 router.delete('/deletesbatch/:id',auth,authorizationRole(["admin", "staff"]), deleteBatch)
+
+// send approval request (staff)
+router.post(
+  "/send-approval-request",
+  auth,
+  authorizationRole(["admin", "staff"]),
+  sendApprovalBatch
+);
+
+router.patch("/approve/:id", auth, authorizationRole(["admin"]), approveBatch);
+
+router.patch("/decline/:id", auth, authorizationRole(["admin"]), declineBatch);
 
 
 module.exports = router
