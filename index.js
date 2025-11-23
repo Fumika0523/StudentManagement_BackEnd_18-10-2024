@@ -26,7 +26,7 @@ app.use(admissionRoutes)
 app.use(courseRoutes)
 app.use(batchRoutes)
 app.use(dashboardRoutes)
-app.use("/api", require("./utils/testEmail"));
+// app.use("/api", require("./utils/testEmail"));
 
 
 app.listen(Port,()=>{

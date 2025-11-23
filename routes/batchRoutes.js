@@ -21,7 +21,7 @@ router.delete('/deletesbatch/:id',auth,authorizationRole(["admin", "staff"]), de
 
 // send approval request (staff)
 router.post(
-  "/send-approval-request",
+  "/batch/send-approval-request",
   auth,
   authorizationRole(["admin", "staff"]),
   sendApprovalBatch

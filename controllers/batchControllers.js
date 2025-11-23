@@ -268,20 +268,71 @@ const sendApprovalBatch = async (req, res) => {
 
     const adminEmails = admins.map(a => a.email);
 
-    // Email links
-    const approveUrl  = `${process.env.FRONTEND_URL}/approve?batchId=${batchId}&action=approve`;
-    const declineUrl  = `${process.env.FRONTEND_URL}/approve?batchId=${batchId}&action=decline`;
+    // Modern email HTML
+    const emailHTML = `
+<div style="
+  font-family: Arial, sans-serif;
+  max-width: 480px;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background-color: #f9fafb;
+">
+  
+  <h2 style="color: #1e40af; text-align: center;">Batch Approval Request</h2>
+
+  <p>Hello Admin,</p>
+
+  <p>
+    <strong>${username}</strong> has requested approval for:
+  </p>
+
+  <div style="
+    padding: 12px;
+    background: #fff;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+    margin-top: 8px;
+  ">
+    <p style="margin: 0;">
+      <strong>Batch:</strong> ${batch.batchNumber}<br/>
+      <strong>Course:</strong> ${batch.courseName}<br/>
+      <strong>Requested At:</strong> ${new Date().toLocaleString()}
+    </p>
+  </div>
+
+  <p style="margin-top: 16px;">Please sign in to review this request:</p>
+
+  <a href="${process.env.FRONTEND_URL}/login?redirect=/batch/approve/${batchId}"
+     style="
+      display: block;
+      width: 100%;
+      padding: 12px 0;
+      background-color: #2563eb;
+      color: white;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: bold;
+      margin-top: 12px;
+     ">
+    Review Request
+  </a>
+
+  <p style="font-size: 12px; color: #6b7280; margin-top: 15px;">
+    If you did not expect this email, you may safely ignore it.
+  </p>
+
+</div>
+`;
 
     // Send emails to all admins
     for (const email of adminEmails) {
       await sendEmail({
         to: email,
         subject: "Batch Approval Request",
-        html: `
-          <p>Staff <strong>${username}</strong> is requesting approval for batch <strong>${batch.batchNumber}</strong>.</p>
-          <p><a href="${approveUrl}" style="padding:8px;background:green;color:white;border-radius:5px;">Approve</a></p>
-          <p><a href="${declineUrl}" style="padding:8px;background:red;color:white;border-radius:5px;">Decline</a></p>
-        `
+        html: emailHTML
       });
     }
 
@@ -292,7 +343,6 @@ const sendApprovalBatch = async (req, res) => {
     res.status(500).send({ message: "Internal error sending approval" });
   }
 };
-
 
 module.exports = {
   getAllBatches,

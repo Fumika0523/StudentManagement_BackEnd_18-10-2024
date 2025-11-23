@@ -13,21 +13,25 @@ const batchSchema = new mongoose.Schema({
     assignedStudentCount:{type:Number,default:0},
     status:{type:String,
     required:true,
-    enum: ["Not Started", "In Progress", "Completed", "Training Completed"],
+enum: ["Not Started", "In Progress", "Training Completed", "Batch Completed"],
     default:"Not Started"
     },
-    isApproved: {
-  type: Boolean,
-  default: false
-},
-approvalStatus: {
-  type: String,
-  enum: ["none", "pending", "approved", "declined"],
-  default: "none"
-},
 requestedBy: {
   type: String,
   default: ""
+},
+approvalStatus: {
+  type: String,
+  enum: ["pending", "approved", "declined", null],
+  default: null
+},
+approvedBy: {
+  type: String,
+  default: null
+},
+approvedAt: {
+  type: Date,
+  default: null
 },
 startDate:{type:Date,required:true}
 },{
