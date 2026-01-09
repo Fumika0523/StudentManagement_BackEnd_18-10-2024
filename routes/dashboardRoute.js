@@ -5,16 +5,16 @@ const Student = require('../model/studentModel');
 const Batch = require('../model/batchModel');
 const { auth, authorizationRole } = require('../middleware/auth');
 
-router.get('/earnings', auth, authorizationRole("admin"), async (req, res) => {
+router.get('/earnings', auth, authorizationRole(["admin" , "staff"]), async (req, res) => {
   try {
     //  Read month and year from query params
     const { month, year } = req.query;
-
+    console.log("month",month)
     const currentYear = year ? parseInt(year) : new Date().getFullYear();
     const currentMonth = month
       ? new Date(`${month} 1, ${currentYear}`).getMonth() + 1
       : new Date().getMonth() + 1;
-
+    console.log("currentMonth",currentMonth)
     //  Define time boundaries
     const startOfMonth = new Date(currentYear, currentMonth - 1, 1);
     const startOfNextMonth = new Date(currentYear, currentMonth, 1);
@@ -26,6 +26,7 @@ router.get('/earnings', auth, authorizationRole("admin"), async (req, res) => {
     const monthlyAdmissions = await Admission.find({
       admissionDate: { $gte: startOfMonth, $lt: startOfNextMonth },
     }).select("admissionFee");
+    console.log("monthlyAdmissions",monthlyAdmissions)
 
     const yearlyAdmissions = await Admission.find({
       admissionDate: { $gte: startOfYear, $lt: startOfNextYear },

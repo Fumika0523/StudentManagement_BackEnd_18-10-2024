@@ -2,17 +2,20 @@ const mongoose = require ('mongoose')
 const jwt = require("jsonwebtoken")
 
 const userSchema = new mongoose.Schema({
-    username:{type:String,required:true},
+    googleId:{type:String},
+    name:{type:String},
+    username:{type:String,required:false},
     email:{type:String,required:true},
-    password:{type:String,required:true},
+    password:{type:String,required:false},
     phoneNumber:{type:Number,required:false},
     gender:{type:String,default:"Rather not say"},
-    birthdate:{type:Date,required:true},
+    birthdate:{type:Date,required:false},
     role:{
         type:String,
         enum:["admin","user","manager","supportTeam","testingTeam","guest","student","staff"],
-        required:true,
-        // default:"user"  
+        //enum:["staff"],
+        required:false,
+        // default:"admin"  
     }
 },{
     timestamps:true //registered time
@@ -41,4 +44,3 @@ const User = mongoose.model("User",userSchema)
 
 module.exports=User
 
-// For Staff 

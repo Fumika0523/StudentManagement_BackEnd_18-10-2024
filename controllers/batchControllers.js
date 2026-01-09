@@ -188,7 +188,7 @@ const approveBatch = async (req, res) => {
       });
     }
 
-    res.send({ message: "Batch approved", batch: updated });
+    res.send({ message: `${batch.batchNumber} has been approved`, batch: updated });
 
   } catch (e) {
     console.log("Approve error:", e);
@@ -208,8 +208,6 @@ const declineBatch = async (req, res) => {
     .status(400)
     .send({ message: "This approval link is no longer active." });
 }
-
-
     const updated = await Batch.findByIdAndUpdate(
       req.params.id,
       {
@@ -304,7 +302,7 @@ const sendApprovalBatch = async (req, res) => {
 
   <p style="margin-top: 16px;">Please sign in to review this request:</p>
 
-  <a href="${process.env.FRONTEND_URL}/login?redirect=/batch/approve/${batchId}"
+  <a href="${process.env.FRONTEND_URL}/staff-signin?redirect=/approve&batchId=${batchId}"
      style="
       display: block;
       width: 100%;
@@ -344,6 +342,22 @@ const sendApprovalBatch = async (req, res) => {
   }
 };
 
+const getSingleBatch = async(req,res)=>{
+  try{
+     const singleBatchData = await Batch.findById(req.params.id)
+    if(!singleBatchData){
+      res.send.status(ror)({message:"The single batch data cannot be found"})
+    }
+    res.send({
+      message:"Single batch fetched successfully",
+      singleBatch:singleBatchData
+    })
+  }catch(e){
+  console.log("Error Getting single batch:",e)
+  res.status(500).send({message:"internal server error"}) 
+  }
+}
+
 module.exports = {
   getAllBatches,
   addBatch,
@@ -352,5 +366,6 @@ module.exports = {
   deleteBatch,
   approveBatch,
   declineBatch,
-  sendApprovalBatch
+  sendApprovalBatch,
+  getSingleBatch
 };

@@ -6,14 +6,15 @@ const sharp = require('sharp')
 const signUp = async (req, res) => {
   try {
     // check if the user is already registered
-    let user = await User.findOne({
-      $or: [
+    let user = await User.findOne(
+    //   $or: [
         { email: req.body.email },
-        { phoneNumber: req.body.phoneNumber }
-      ]
-    });
+        // { phoneNumber: req.body.phoneNumber }
+    //   ]
+    );
 
-if (user) { console.log("User is found", req.body.email);
+if (user) 
+    { console.log("User is found", req.body.email, user);
      return res.status(400).send("User Already Exist. Please Log-in"); 
     }
     // password hashing
@@ -26,6 +27,7 @@ if (user) { console.log("User is found", req.body.email);
       password: hashedPassword
     });
     await userData.save();
+    console.log("usreData",userData)
 
     // if student role, also save in Student collection
     if (req.body.role === "student") {
@@ -42,6 +44,11 @@ if (user) { console.log("User is found", req.body.email);
       });
       await studentData.save();
     }
+    console.log({ 
+      success: true,
+      user: userData, 
+      message: "Successfully registered a new user" 
+    })
     res.status(200).json({ 
       success: true,
       user: userData, 
@@ -55,7 +62,7 @@ if (user) { console.log("User is found", req.body.email);
 }
 
 const signIn = async(req,res)=>{
-    try{
+   // try{
         let user = await User.findOne({
         //checking by user detail with email
         //username coming from postman which you entering
@@ -66,19 +73,19 @@ const signIn = async(req,res)=>{
         if(!user){
             return res.status(400).send
             ({
-                message:"Username Not Found"
+                message:"User is not exist"
             })}
             //checking by user with password
             const isMatch = await bcrypt.compare(req.body.password,user.password)// from postman , from the email is matched?
             if(!isMatch){
                 return res.status(400).send({
-                    message:"Please Check Your Password"
+                    message:"Please check your password"
                 })}
                 //if user and isMatch both validations are successful then generate the token
                 if(isMatch && user){
                     const token = await user.generateAuthToken()
                     return res.status(200).send({
-                        message:"You have successfully Signed-in!!!",
+                        message:"You have successfully signed-in!",
                         user:user,
                         role: user.role,
                         token:token,
@@ -86,11 +93,11 @@ const signIn = async(req,res)=>{
                 }
             // If all conditions failed it will come to this
             res.status(401).send({
-                message:"Your login credentials are incorrect,kindly check and re-enter!"
+                message:"Your login credentials are incorrect, kindly check and re-try."
             })
-    }catch(e){
-            res.status(500).send({message:"Some Internal Error"})
-    }
+    // }catch(e){
+    //         res.status(500).send({message:"Some Internal Error"})
+    // }
 }
 
 const getProfile =async(req,res)=>{

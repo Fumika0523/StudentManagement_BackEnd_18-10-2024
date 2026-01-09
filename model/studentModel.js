@@ -6,9 +6,9 @@ const studentSchema = new mongoose.Schema({
     username:{type:String,required:true},
     email:{type:String,required:true},
     password:{type:String,required:true},
-    phoneNumber:{type:Number,required:true},
+    phoneNumber:{type:Number,required:false},
     gender:{type:String,default:"Rather not say"},
-    birthdate:{type:Date,required:true},
+    birthdate:{type:Date,required:false},
     courseName:{type:String,required:false},//when you add the admission
     admissionFee:{type:Number,required:false},
     preferredCourses:{type:[String],required:false,}, //when you add the student

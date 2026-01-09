@@ -8,7 +8,7 @@ const auth = async(req,res,next)=>{
         if(!req.header('Authorization')){
             return res.send
             ({
-                message:"Authorization Header is Mission"
+                message:"Authorization Header is Missing"
             })
         }
         const token =req.header('Authorization').replace("Bearer ","")
