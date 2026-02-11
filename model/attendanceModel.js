@@ -1,17 +1,31 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
 const attendanceSchema = new mongoose.Schema({
-    attendance:{type:Number,require:true},
-    sessionId:{type:String,require:true},
-    attendanceDate:{type:Number,require:true},
-    studentId:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"Attendance",
-        required:true
-    }
-},{
-    timestamps:true
-})
+  student: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User', // Your Student User model
+    required: true
+  },
+  batch: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Batch', 
+    required: true
+  },
+  date: {
+    type: Date,
+    required: true,
+    default: Date.now
+  },
+  status: {
+    type: String,
+    enum: ['Present', 'Absent'],
+    default: 'Present'
+  },
+  recordedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User' 
+  }
+}, { timestamps: true });
 
-const Admission = mongoose.model("Attendance",admissionSchema)
-module.exports = Admission
+// Indexing for faster lookups when generating reports
+attendanceSchema.index({ student: 1, date: 1 }, { unique: true });

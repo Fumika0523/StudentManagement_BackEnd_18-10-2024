@@ -9,9 +9,12 @@ const studentSchema = new mongoose.Schema({
     phoneNumber:{type:Number,required:false},
     gender:{type:String,default:"Rather not say"},
     birthdate:{type:Date,required:false},
-    courseName:{type:String,required:false},//when you add the admission
+    courseName:{type:String,required:false},
+    batchNumber: {type: String,default: null},
     admissionFee:{type:Number,required:false},
-    preferredCourses:{type:[String],required:false,}, //when you add the student
+    batchNumber: {type: String,default: null},
+    preferredCourses:{type:[String],required:false,},
+    status: { type: String, default: "Not Assigned" },
     courseId:{
             type:mongoose.Schema.Types.ObjectID,
             ref:"Course",

@@ -2,73 +2,93 @@ const Admission = require('../model/admissionModel')
 const Student = require('../model/studentModel')
 const Batch = require('../model/batchModel')
 
-
 // need to update batch number,
 const addAdmission = async (req, res) => {
-  try {
-    //prints the authenticated user
-   // console.log("Add Admission", req.user);
-    const { admissionDate, batchNumber, studentId } = req.body;
-
-    // Check if batchNumber can be found in Batch collection, otherwise show the error
-    const batch = await Batch.findOne({ batchNumber });
-    if (!batch) {
-      return res.status(404).json({ message: "Batch not found" });
-    }
-
-    // const dateObj = new Date(admissionDate); creates a JavaScript Date object by parsing admissionDate. dateObj is then a date/time object you can query (year, month, day, timestamp, etc.) or store.
-    const dateObj = new Date(admissionDate);
-       // console.log("dateObj",dateObj)
-    const year = dateObj.getFullYear();
-        //console.log("year",year)
-    const month = dateObj.toLocaleString("default", { month: "short" });
-         //console.log("month",month)
-
-    // Create admission detail
-    const admissionDetail = new Admission({
-      ...req.body,
+try {
+    const {
+      batchNumber,
+      courseId,
       studentId,
-      admissionYear: year,
-      admissionMonth: month,
-      batchNumber: batch.batchNumber, // use matched batch
-    });
-    admissionDetail.admissionId = admissionDetail._id;
-    console.log("admissionDetail",admissionDetail)
-    // Find single student and update
-    const student = await Student.findById(studentId);
-    if (!student) {
-      return res.status(404).json({ message: "Student not found" });
+      studentName,
+      courseName,
+      admissionSource,
+      admissionFee,
+      admissionDate,
+      admissionYear,
+      admissionMonth,
+      status, // "Assigned"
+    } = req.body;
+
+    // basic validation
+    if (!batchNumber || !courseId || !studentId || !studentName || !courseName || !admissionDate) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields",
+      });
     }
 
-    student.courseId = admissionDetail.courseId;
-    // student.admissionFee = admissionDetail.admissionFee;
-    student.courseFee = admissionDetail.admissionFee;
-    student.courseName = admissionDetail.courseName;
-    student.admissionDate = admissionDetail.admissionDate;
+    //  Prevent same student being assigned multiple times
+    const alreadyAssigned = await Admission.findOne({ studentId });
+    if (alreadyAssigned) {
+      return res.status(409).json({
+        success: false,
+        message: "This student is already assigned to a batch.",
+      });
+    }
 
-    await student.save();
-
-    // Increment assignedStudentCount in batch
-    batch.assignedStudentCount = (batch.assignedStudentCount || 0) + 1;
-    await batch.save();
-
-    // Save the admission
-    await admissionDetail.save();
-
-    res.status(200).json({
-      admissionDetail,
-      batchAssignedStudentCount: batch.assignedStudentCount,
-      message: "Admission added and batch count updated successfully!",
+    //  Create Admission
+    const createdAdmission = await Admission.create({
+      batchNumber,
+      courseId,
+      studentId,
+      studentName,
+      courseName,
+      admissionSource,
+      admissionFee,
+      admissionDate,
+      admissionYear,
+      admissionMonth,
+      status: status || "Assigned",
     });
-  } catch (e) {
-    console.error("Error in addAdmission:", e);
-    res.status(500).json({ message: "Some Internal Error", error: e.message });
+
+    // Update Student status (and optionally related fields)
+    await Student.findByIdAndUpdate(
+      studentId,
+      {
+        $set: {
+          status: status || "Assigned",
+          batchNumber,        // optional: only if studentModel has it
+          courseId,           // optional
+          courseName,         // optional
+          admissionDate,      // optional
+          admissionFee,       // optional
+        },
+      },
+      { new: true }
+    );
+
+    // Update batch assigned count (optional but recommended)
+    await Batch.findOneAndUpdate(
+      { batchNumber },
+      { $inc: { assignedStudentCount: 1 } },
+      { new: true }
+    );
+
+    return res.status(201).json({
+      success: true,
+      message: "Admission added and student status updated.",
+      admission: createdAdmission,
+    });
+  } catch (error) {
+    console.error("addAdmission error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while adding admission.",
+    });
   }
 };
 
-
 const getAllAdmission = async(req,res)=>{
-    // With Auth 
      try{
      //   console.log(req.token)
         const getAdmissionData = await Admission.find()
@@ -77,8 +97,7 @@ const getAllAdmission = async(req,res)=>{
         }res.send({admissionData:getAdmissionData})
     }catch(e){
         res.send({message:"Some Internal Error"})
-    }
-    }
+    }}
 
     const getSingleAdmission = async(req,res)=>{
     const admissionById = await Admission.findById(
@@ -92,36 +111,66 @@ const getAllAdmission = async(req,res)=>{
 // Count should be incre/dec >>> if initially batchNumber is not alloted > Later update
 const updateAdmission = async (req, res) => {
   const admissionId = req.params.id;
+
   try {
-    // 1) Find a current admission
     const currentAdmission = await Admission.findById(admissionId);
     if (!currentAdmission) {
       return res.status(404).json({ message: "Admission not found" });
     }
 
-    const oldBatchNumber = currentAdmission.batchNumber; // may be undefined/null
-    const newBatchNumber = req.body.batchNumber; // may be undefined (not changing)
+    // Prevent changing studentId via update (recommended)
+    if (req.body.studentId && String(req.body.studentId) !== String(currentAdmission.studentId)) {
+      return res.status(400).json({ message: "Changing studentId is not allowed in updateAdmission." });
+    }
 
-    // 2) If batchNumber is not changing (or not provided), just update admission normally
-    if (!req.body.batchNumber || newBatchNumber === oldBatchNumber) {
+    const studentId = currentAdmission.studentId;
+
+    const oldBatchNumber = currentAdmission.batchNumber;
+    const newBatchNumber = req.body.batchNumber;
+
+    // 1) If batchNumber not provided or not changing => update admission only + sync student fields
+    if (!newBatchNumber || newBatchNumber === oldBatchNumber) {
       const updatedAdmission = await Admission.findOneAndUpdate(
         { _id: admissionId },
         req.body,
         { new: true, runValidators: true }
       );
+
+      //  Sync student status based on admission status (default "Assigned")
+      const nextStatus = updatedAdmission?.status || "Assigned";
+
+      await Student.findByIdAndUpdate(studentId, {
+        $set: {
+          status: nextStatus,
+          // optional fields (only keep if your studentModel has them)
+          batchNumber: updatedAdmission.batchNumber,
+          courseId: updatedAdmission.courseId,
+          courseName: updatedAdmission.courseName,
+          admissionDate: updatedAdmission.admissionDate,
+          admissionFee: updatedAdmission.admissionFee,
+        }
+      });
+
       return res.status(200).json({
         message: "Admission updated",
         updateAdmission: updatedAdmission
       });
     }
 
-    // 3) batchNumber is changing -> ensure target (new) batch exists
+    // 2) batchNumber is changing => ensure target batch exists
     const newBatch = await Batch.findOne({ batchNumber: newBatchNumber });
     if (!newBatch) {
       return res.status(404).json({ message: "Target batch not found" });
     }
 
-    // 4) Update admission first (so we have the modified admission doc to return)
+    //  Capacity check (prevents overfilling)
+    const assigned = newBatch.assignedStudentCount ?? 0;
+    const target = newBatch.targetStudent ?? 0;
+    if (target > 0 && assigned >= target) {
+      return res.status(400).json({ message: "Sorry! This batch is full." });
+    }
+
+    // 3) Update admission
     const updatedAdmission = await Admission.findOneAndUpdate(
       { _id: admissionId },
       req.body,
@@ -131,51 +180,54 @@ const updateAdmission = async (req, res) => {
       return res.status(500).json({ message: "Failed to update admission" });
     }
 
-    // 5) Increment the new batch assignedStudentCount atomically
+    // 4) Increment new batch count
     const updatedNewBatch = await Batch.findOneAndUpdate(
       { batchNumber: newBatchNumber },
-      //$inc is a MongoDB update operator that adds the specified value to a numeric field.
       { $inc: { assignedStudentCount: 1 } },
       { new: true }
     );
 
     if (!updatedNewBatch) {
-      // rollback: revert admission to old batchNumber
-      await Admission.findByIdAndUpdate(admissionId, { batchNumber: oldBatchNumber }).catch(err =>
-        console.error("Rollback: failed to revert admission", err)
-      );
+      await Admission.findByIdAndUpdate(admissionId, { batchNumber: oldBatchNumber }).catch(() => {});
       return res.status(500).json({ message: "Failed to increment new batch count; rolled back admission" });
     }
 
-    // 6) Decrement the old batch assignedStudentCount (if there was an old batch)
+    // 5) Decrement old batch count (if existed)
     let updatedOldBatch = null;
     if (oldBatchNumber) {
-      // Use filter assignedStudentCount > 0 to prevent negative counts — treat failure as an inconsistency
       updatedOldBatch = await Batch.findOneAndUpdate(
-        //“only match if assignedStudentCount is greater than 0.”
         { batchNumber: oldBatchNumber, assignedStudentCount: { $gt: 0 } },
         { $inc: { assignedStudentCount: -1 } },
         { new: true }
       );
 
       if (!updatedOldBatch) {
-        // Compensate: decrement the increment we did on the new batch, then revert admission
+        // compensation
         await Batch.findOneAndUpdate(
           { batchNumber: newBatchNumber },
           { $inc: { assignedStudentCount: -1 } }
-        ).catch(err => console.error("Compensation: failed to decrement new batch", err));
-
-        await Admission.findByIdAndUpdate(admissionId, { batchNumber: oldBatchNumber }).catch(err =>
-          console.error("Rollback: failed to revert admission", err)
-        );
+        ).catch(() => {});
+        await Admission.findByIdAndUpdate(admissionId, { batchNumber: oldBatchNumber }).catch(() => {});
 
         return res.status(500).json({
-          message: "Failed to decrement old batch count; changes were rolled back. Please check batch counts for consistency."
+          message: "Failed to decrement old batch count; changes rolled back."
         });
       }
     }
 
-    // 7) Success response: admission updated & batch counts adjusted
+    //  6) Sync Student after successful admission change
+    const nextStatus = updatedAdmission.status || "Assigned";
+    await Student.findByIdAndUpdate(studentId, {
+      $set: {
+        status: nextStatus,
+        batchNumber: updatedAdmission.batchNumber,
+        courseId: updatedAdmission.courseId,
+        courseName: updatedAdmission.courseName,
+        admissionDate: updatedAdmission.admissionDate,
+        admissionFee: updatedAdmission.admissionFee,
+      }
+    });
+
     return res.status(200).json({
       message: "Admission updated and batch counts adjusted successfully",
       updateAdmission: updatedAdmission,
@@ -185,11 +237,9 @@ const updateAdmission = async (req, res) => {
 
   } catch (err) {
     console.error("Error in updateAdmission:", err);
-    // Best-effort cleanup could be added here, but avoid complex retry logic inside catch
     return res.status(500).json({ message: "Some Internal Error", error: err.message });
   }
 };
-
 
 // check studentassignedCount >>  decrease the studentAssignedCount by 1 >>> role : admin
 const deleteAdmission = async (req, res) => {

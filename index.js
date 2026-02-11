@@ -14,6 +14,8 @@ const courseRoutes = require('./routes/courseRoutes')
 const batchRoutes = require('./routes/batchRoutes')
 const dashboardRoutes = require('./routes/dashboardRoute')
 const session = require('express-session');
+const attendanceRoute = require('./routes/attendanceRoutes.js');
+const excelRoutes = require("./routes/excel.routes.js")
 
 connection()
 
@@ -21,7 +23,7 @@ app.use(express.json())
 
 //set cookie
 app.use(cors({
-    origin: 'http://localhost:5173', // when it's production?
+    origin: 'http://localhost:5174', // when it's production?
     credentials:true,
 }))
 
@@ -47,6 +49,8 @@ app.use(admissionRoutes)
 app.use(courseRoutes)
 app.use(batchRoutes)
 app.use(dashboardRoutes)
+app.use(attendanceRoute);
+app.use('/api/excel',excelRoutes)
 // app.use("/api", require("./utils/testEmail"));
 
 // app.get('/',(req,res)=>{
@@ -105,11 +109,11 @@ app.get(
 
       //  Redirect to frontend OAuth handler
       res.redirect(
-        `http://localhost:5173/oauth-success?token=${token}&role=student`
+        `http://localhost:5174/oauth-success?token=${token}&role=student`
       );
     } catch (err) {
       console.error("Google OAuth error:", err);
-      res.redirect("http://localhost:5173/signin");
+      res.redirect("http://localhost:5174/signin");
     }
   }
 );

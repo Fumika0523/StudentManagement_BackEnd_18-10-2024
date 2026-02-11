@@ -1,6 +1,12 @@
 const Student = require('../model/studentModel')
 const bcrypt = require ('bcryptjs')
 const sharp = require('sharp')
+const multer=require('multer')
+const storage = multer.memoryStorage() //buffer
+const upload = multer({ storage: storage })
+const csv=require('csvtojson')
+const fs=require("fs")
+const path=require("path")
 
 const addStudent = async(req,res)=>{
 //try{
@@ -116,4 +122,42 @@ const deleteStudent = async(req,res)=>{
     }
 }
 
-module.exports = {signIn, getAllStudent,singleStudent, updateStudent,deleteStudent, addStudent}
+//multer >> upload option in nodejs app
+//csvtojson >> convert csv data to json
+// xlsv >> read ur excel
+
+//npm i multer
+// npm i csvtojson
+//npm i xlsx
+//memory storage
+
+// CSV
+
+// const getFile = async(req,res)=>{
+//     res.send("Testing.. student module.. get File")
+// }
+
+// const uploadFile = async(req,res)=>{
+//     try{
+//         let data = []
+//         const file = req.file // instead of req.body
+//         //error handler
+//         // file should end with .csv / excel
+//         if(file.originalname.endWith(".csv")){
+//         //csv to json //
+//         data=await csv().fromFile(file.buffer.toString()) //single single json data -> {} {} {} >> data [{},{}]
+//         }
+//         if(file.originalname.endWith("xlsx")){
+        
+//         }else{
+//             res.send("Please upload a csv file")
+//         }
+//     }catch(e){
+//         res.send("Some Internal Error",e)
+//     }
+// }
+
+// fs module >> file system >> work with file
+// path module >> 
+
+module.exports = {signIn, getAllStudent,singleStudent, updateStudent,deleteStudent, addStudent,}
