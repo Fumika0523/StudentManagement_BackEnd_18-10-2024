@@ -10,7 +10,6 @@ const studentSchema = new mongoose.Schema({
     gender:{type:String,default:"Rather not say"},
     birthdate:{type:Date,required:false},
     courseName:{type:String,required:false},
-    batchNumber: {type: String,default: null},
     admissionFee:{type:Number,required:false},
     batchNumber: {type: String,default: null},
     preferredCourses:{type:[String],required:false,},

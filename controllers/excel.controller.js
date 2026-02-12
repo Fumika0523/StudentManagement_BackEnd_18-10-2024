@@ -61,11 +61,10 @@ console.log(e)
 const downloadStudentTemplate=(req,res)=>{
     console.log("downloadStudentTemplate is calling..")
     const templateData = [
-       {studentName:"",userName:"", email:"", password:"",gender:"",birthdate:"", courseId:"", courseName:"",batchNumber:"", batchNumber:"",preferredCourses:[],status:"" } 
+       {studentName:"",username:"", email:"", password:"",phoneNumber:"",gender:"",birthdate:"", preferredCourses:[], } 
     ]
     const wb = xlsx.utils.book_new() // new excel sheet
     const ws = xlsx.utils.json_to_sheet(templateData) //json data to sheet >> template Data
-
     xlsx.utils.book_append_sheet(wb,ws,"Students")
 
     //store that location
@@ -78,9 +77,16 @@ const downloadStudentTemplate=(req,res)=>{
 const importStudentExcel = async(req,res)=>{
     console.log("import  from studentBulkloadController is calling")
     try{
+        console.log("importStudentExcel:",req.file)
         const workbook = xlsx.readFile(req.file.path)
         const sheetName = workbook.SheetNames[0] //Students
-        const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName])
+        const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName], {
+        raw: false,      // gives formatted text for some cells
+        cellDates: true, // parse date cells as Date where possible
+        });        
+            console.log("First row keys:", Object.keys(data?.[0] || {}));
+console.log("First row:", data?.[0]);
+
 
         let inserted = 0
         let updated = 0
@@ -123,6 +129,7 @@ const downloadAdmissionTemplate=(req,res)=>{
     xlsx.writeFile(wb,filePath)
     res.download(filePath, "admissions_template.xlsx")
 }
+
 const importAdmissionExcel = async(req,res)=>{
     console.log("import  from admissionBulkloadController is calling")
     try{
