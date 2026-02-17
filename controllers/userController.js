@@ -33,8 +33,10 @@ if (user)
     if (req.body.role === "student") {
       const studentData = new Student({
         _id: userData._id,              // studentId = userId
-        username: req.body.username,    
-        studentName: req.body.username, 
+        username: req.body.username,   
+        firstName :req.body.firstName,
+        lastName:req.body.lastName,
+        displayName:req.body.name,
         birthdate: req.body.birthdate,  
         email: req.body.email,
         phoneNumber: req.body.phoneNumber,
@@ -66,9 +68,9 @@ const signIn = async(req,res)=>{
         let user = await User.findOne({
         //checking by user detail with email
         //username coming from postman which you entering
-        username:req.body.username
+        username:req.body.username?.toLowerCase()
         })
-       //console.log(user)
+       console.log(user)
         //console.log(req.body.password)
         if(!user){
             return res.status(400).send

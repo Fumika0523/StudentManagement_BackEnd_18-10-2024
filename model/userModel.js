@@ -1,46 +1,77 @@
-const mongoose = require ('mongoose')
-const jwt = require("jsonwebtoken")
+const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken");
 
-const userSchema = new mongoose.Schema({
-    googleId:{type:String},
-    name:{type:String},
-    username:{type:String,required:false},
-    email:{type:String,required:true},
-    password:{type:String,required:false},
-    phoneNumber:{type:Number,required:false},
-    gender:{type:String,default:"Rather not say"},
-    //birthdate:{type:Date,required:false},
-    role:{
-        type:String,
-        enum:["admin","user","manager","supportTeam","testingTeam","guest","student","staff"],
-        //enum:["staff"],
-        required:false,
-        // default:"admin"  
-    }
-},{
-    timestamps:true //registered time
-})
+const userSchema = new mongoose.Schema(
+  {
+    googleId: { type: String, trim: true },
+    //  structured name
+    firstName: { type: String, trim: true },
+    lastName: { type: String, trim: true },
+    //  keep for display + backward compatibility
+    name: { type: String, trim: true }, 
+    username: { type: String, required: true, unique: true, lowercase: true,
+     trim: true
+     },
+    email: {
+      type: String,
+      required: true,
+      unique: true,        
+      lowercase: true,
+      trim: true,
+    },
 
-userSchema.methods.generateAuthToken = async function(req,res){
-    const user = this
-    const token = jwt.sign({_id:user.id,role:user.role},process.env.JWT_SECRET_KEY)
-    console.log(token)
-    return token
-}
+    password: { type: String, required: false },
 
-// userSchema.virtual('admissionRel',{
-//     ref:"Admission",
-//     localField:"_id",
-//     foreignField:"owner"
-// })
+    phoneNumber: { type: String, required: false, trim: true },
 
-userSchema.virtual('studentRel',{
-    ref:"Student",
-    localField:"_id",
-    foreignField:"owner"
-})
+    gender: { type: String, default: "Rather not say" },
+    birthdate: { type: Date, required: false },
 
-const User = mongoose.model("User",userSchema)
+    role: {
+      type: String,
+      enum: [
+        "admin",
+        "user",
+        "manager",
+        "supportTeam",
+        "testingTeam",
+        "guest",
+        "student",
+        "staff",
+      ],
+      required: false,
+      default: "user", 
+    },
+  },
+  { timestamps: true }
+);
 
-module.exports=User
+//  auto-fill name if missing
+userSchema.pre("save", function (next) {
+  if (!this.name) {
+    const fn = (this.firstName || "").trim();
+    const ln = (this.lastName || "").trim();
+    const full = `${fn} ${ln}`.trim();
+    if (full) this.name = full;
+  }
+  next();
+});
 
+//  create indexes
+userSchema.index({ email: 1 }, { unique: true });
+userSchema.index({ username: 1 }, { sparse: true }); // only if you want unique username later
+
+userSchema.methods.generateAuthToken = async function () {
+  return jwt.sign(
+    { _id: this.id, role: this.role },
+    process.env.JWT_SECRET_KEY
+  );
+};
+
+userSchema.virtual("studentRel", {
+  ref: "Student",
+  localField: "_id",
+  foreignField: "owner",
+});
+
+module.exports = mongoose.model("User", userSchema);
