@@ -24,6 +24,7 @@ xlsx.writeFile(wb,filePath)
 
 res.download(filePath, "users_template.xlsx")
 }
+
 const importExcel = async(req,res)=>{
 console.log("ImportExcel")
 try{
@@ -76,7 +77,8 @@ const downloadStudentTemplate=(req,res)=>{
     res.download(filePath, "students_template.xlsx")
 }
 
-const importStudentExcel = async (req, res) => {
+//add and update
+const addUpdateStudentExcel = async (req, res) => {
   console.log("importStudentExcel is calling");
 
   try {
@@ -229,8 +231,95 @@ const importStudentExcel = async (req, res) => {
     return res.status(500).json({ message: "Internal server error", error: e.message });
   }
 };
-//edit
+
 //delete
+const bulkDeleteStudentsExcel = async (req, res) => {
+  console.log("bulkDeleteStudentsExcel is calling");
+
+  try {
+    if (!req.file?.path) {
+      return res.status(400).json({ message: "Excel file is required" });
+    }
+
+    const workbook = xlsx.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0];
+    const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName], {
+      raw: false,
+      defval: "",
+    });
+
+    let deleted = 0;
+    let notFound = 0;
+    const errors = [];
+    const deletedRows = [];
+    const notFoundRows = [];
+
+    for (let i = 0; i < data.length; i++) {
+      const row = data[i];
+
+      try {
+        const email = String(row.email || "").trim().toLowerCase();
+        const username = String(row.username || "").trim();
+
+        if (!email && !username) {
+          errors.push({ row: i + 2, key: "unknown", reason: "Missing email or username" });
+          continue;
+        }
+
+        // Find user by email OR username
+        const user = await User.findOne(
+          email ? { email } : { username }
+        ).select("_id email username role");
+
+        if (!user) {
+          notFound++;
+          notFoundRows.push({ row: i + 2, email: email || null, username: username || null });
+          continue;
+        }
+
+        // Optional safety: only allow deleting students
+        // If you want to prevent deleting admins/staff accidentally:
+        if (user.role && user.role !== "student") {
+          errors.push({
+            row: i + 2,
+            key: email || username,
+            reason: `Refused: role is '${user.role}', not 'student'`,
+          });
+          continue;
+        }
+
+        // Delete student first (match by userId OR email as fallback)
+        await Student.deleteMany({
+          $or: [{ userId: user._id }, ...(email ? [{ email }] : [])],
+        });
+
+        // Delete user
+        await User.deleteOne({ _id: user._id });
+
+        deleted++;
+        deletedRows.push({ row: i + 2, email: user.email, userId: String(user._id) });
+      } catch (err) {
+        console.error(`Delete error on row ${i + 2}:`, err);
+        errors.push({ row: i + 2, key: row.email || row.username || "unknown", reason: err.message });
+      }
+    }
+
+    return res.json({
+      message: "Delete processed",
+      deleted,
+      notFound,
+      failed: errors.length,
+      deletedRows,
+      notFoundRows,
+      errors,
+    });
+  } catch (e) {
+    console.error("Fatal error in bulkDeleteStudentsExcel:", e);
+    return res.status(500).json({ message: "Internal server error", error: e.message });
+  }
+};
+
+module.exports = { bulkDeleteStudentsExcel };
 
 //Admission//
 const downloadAdmissionTemplate=(req,res)=>{
@@ -249,7 +338,7 @@ const downloadAdmissionTemplate=(req,res)=>{
     xlsx.writeFile(wb,filePath)
     res.download(filePath, "admissions_template.xlsx")
 }
-
+//Add & update admission
 const importAdmissionExcel = async(req,res)=>{
     console.log("import  from admissionBulkloadController is calling")
     try{
@@ -290,4 +379,4 @@ console.log("First row:", data?.[0]);
 //edit
 //delete
 
-module.exports={downloadTemplate,importExcel,downloadStudentTemplate, importStudentExcel,downloadAdmissionTemplate, importAdmissionExcel}
+module.exports={downloadTemplate,importExcel,downloadStudentTemplate, addUpdateStudentExcel,downloadAdmissionTemplate, importAdmissionExcel, bulkDeleteStudentsExcel }
