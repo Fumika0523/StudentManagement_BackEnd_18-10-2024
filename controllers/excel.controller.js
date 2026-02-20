@@ -233,93 +233,57 @@ const addUpdateStudentExcel = async (req, res) => {
 };
 
 //delete
-const bulkDeleteStudentsExcel = async (req, res) => {
-  console.log("bulkDeleteStudentsExcel is calling");
+const bulkDisableStudentsExcel = async (req, res) => {
+  const workbook = xlsx.readFile(req.file.path);
+  const sheetName = workbook.SheetNames[0];
+  const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName], { defval: "" });
 
-  try {
-    if (!req.file?.path) {
-      return res.status(400).json({ message: "Excel file is required" });
-    }
+  let disabled = 0;
+  let notFound = 0;
+  const errors = [];
 
-    const workbook = xlsx.readFile(req.file.path);
-    const sheetName = workbook.SheetNames[0];
-    const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName], {
-      raw: false,
-      defval: "",
-    });
-
-    let deleted = 0;
-    let notFound = 0;
-    const errors = [];
-    const deletedRows = [];
-    const notFoundRows = [];
-
-    for (let i = 0; i < data.length; i++) {
-      const row = data[i];
-
-      try {
-        const email = String(row.email || "").trim().toLowerCase();
-        const username = String(row.username || "").trim();
-
-        if (!email && !username) {
-          errors.push({ row: i + 2, key: "unknown", reason: "Missing email or username" });
-          continue;
-        }
-
-        // Find user by email OR username
-        const user = await User.findOne(
-          email ? { email } : { username }
-        ).select("_id email username role");
-
-        if (!user) {
-          notFound++;
-          notFoundRows.push({ row: i + 2, email: email || null, username: username || null });
-          continue;
-        }
-
-        // Optional safety: only allow deleting students
-        // If you want to prevent deleting admins/staff accidentally:
-        if (user.role && user.role !== "student") {
-          errors.push({
-            row: i + 2,
-            key: email || username,
-            reason: `Refused: role is '${user.role}', not 'student'`,
-          });
-          continue;
-        }
-
-        // Delete student first (match by userId OR email as fallback)
-        await Student.deleteMany({
-          $or: [{ userId: user._id }, ...(email ? [{ email }] : [])],
-        });
-
-        // Delete user
-        await User.deleteOne({ _id: user._id });
-
-        deleted++;
-        deletedRows.push({ row: i + 2, email: user.email, userId: String(user._id) });
-      } catch (err) {
-        console.error(`Delete error on row ${i + 2}:`, err);
-        errors.push({ row: i + 2, key: row.email || row.username || "unknown", reason: err.message });
+  for (let i = 0; i < data.length; i++) {
+    const row = data[i];
+    try {
+      const email = String(row.email || "").trim().toLowerCase();
+      if (!email) {
+        errors.push({ row: i + 2, key: "unknown", reason: "Missing email" });
+        continue;
       }
-    }
 
-    return res.json({
-      message: "Delete processed",
-      deleted,
-      notFound,
-      failed: errors.length,
-      deletedRows,
-      notFoundRows,
-      errors,
-    });
-  } catch (e) {
-    console.error("Fatal error in bulkDeleteStudentsExcel:", e);
-    return res.status(500).json({ message: "Internal server error", error: e.message });
+      const user = await User.findOne({ email }).select("_id role isActive");
+      if (!user) {
+        notFound++;
+        continue;
+      }
+
+      if (user.role !== "student") {
+        errors.push({ row: i + 2, key: email, reason: `Refused: role is '${user.role}'` });
+        continue;
+      }
+
+      if (user.isActive === false) {
+        // already disabled - count or skip (your choice)
+        continue;
+      }
+
+      await User.updateOne(
+        { _id: user._id },
+        { $set: { isActive: false, disabledAt: new Date(), disabledBy: req.user?._id || null } }
+      );
+
+      // optional: mark student too
+      // await Student.updateOne({ userId: user._id }, { $set: { status: "inactive" } });
+
+      disabled++;
+    } catch (e) {
+      errors.push({ row: i + 2, key: row.email || "unknown", reason: e.message });
+    }
   }
+
+  res.json({ message: "Disable processed", disabled, notFound, failed: errors.length, errors });
 };
 
-module.exports = { bulkDeleteStudentsExcel };
 
 //Admission//
 const downloadAdmissionTemplate=(req,res)=>{
@@ -379,4 +343,4 @@ console.log("First row:", data?.[0]);
 //edit
 //delete
 
-module.exports={downloadTemplate,importExcel,downloadStudentTemplate, addUpdateStudentExcel,downloadAdmissionTemplate, importAdmissionExcel, bulkDeleteStudentsExcel }
+module.exports={downloadTemplate,importExcel,downloadStudentTemplate, addUpdateStudentExcel,downloadAdmissionTemplate, importAdmissionExcel, bulkDisableStudentsExcel }

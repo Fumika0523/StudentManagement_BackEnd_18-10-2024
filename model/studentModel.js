@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const jwt = require("jsonwebtoken");
+// const jwt = require("jsonwebtoken");
 
 const studentSchema = new mongoose.Schema(
   {
@@ -7,7 +7,7 @@ const studentSchema = new mongoose.Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId, 
       ref: "User",
-      required: true,
+      // required: true,
       unique: true,
       index: true,
     },
@@ -37,8 +37,8 @@ const studentSchema = new mongoose.Schema(
 );
 
 //  indexes (no studentName!)
-studentSchema.index({ username: 1 }, { unique: true });
-studentSchema.index({ email: 1 }, { unique: true });
+// studentSchema.index({ username: 1 }, { unique: true });
+// studentSchema.index({ email: 1 }, { unique: true });
 studentSchema.index({ phoneNumber: 1 }, { sparse: true }); // only if you query by phone a lot
 
 studentSchema.pre("save", function (next) {
@@ -48,9 +48,9 @@ studentSchema.pre("save", function (next) {
   next();
 });
 
-studentSchema.methods.generateAuthToken = async function () {
-  return jwt.sign({ _id: this.id }, process.env.JWT_SECRET_KEY);
-};
+// studentSchema.methods.generateAuthToken = async function () {
+//   return jwt.sign({ _id: this.id }, process.env.JWT_SECRET_KEY);
+// };
 
 studentSchema.virtual("admissionRel", {
   ref: "Admission",

@@ -26,6 +26,9 @@ const userSchema = new mongoose.Schema(
 
     gender: { type: String, default: "Rather not say" },
     birthdate: { type: Date, required: false },
+    isActive: { type: Boolean, default: true, index: true },
+  disabledAt: { type: Date, default: null },
+  disabledBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
 
     role: {
       type: String,

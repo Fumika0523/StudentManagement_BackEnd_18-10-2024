@@ -16,6 +16,8 @@ const dashboardRoutes = require('./routes/dashboardRoute')
 const session = require('express-session');
 const attendanceRoute = require('./routes/attendanceRoutes.js');
 const excelRoutes = require("./routes/excel.routes.js")
+const jwt = require("jsonwebtoken");
+const taskRoutes = require('./routes/taskRoutes.js')
 
 connection()
 
@@ -51,6 +53,8 @@ app.use(batchRoutes)
 app.use(dashboardRoutes)
 app.use(attendanceRoute);
 app.use('/api/excel',excelRoutes)
+app.use(taskRoutes)
+
 // app.use("/api", require("./utils/testEmail"));
 
 // app.get('/',(req,res)=>{
@@ -88,7 +92,6 @@ app.get('/auth/google',
 //         res.redirect('http://localhost:5173/dashboard')
 //     }
 // )
-const jwt = require("jsonwebtoken");
 
 app.get(
   "/auth/google/callback",

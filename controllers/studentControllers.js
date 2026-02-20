@@ -92,16 +92,28 @@ const signIn = async (req, res) => {
 }
 
 const getAllStudent = async (req, res) => {
-    try {
-        //console.log(req.token)
-        const getStudentData = await Student.find()
-        if (!getStudentData) {
-            res.send({ message: "The Student Data cannot b found" })
-        } res.send({ studentData: getStudentData })
-    } catch (e) {
-        res.send({ message: "Some Internal Error" })
-    }
-}
+  try {
+    const students = await Student.find()
+      .populate("userId", "isActive role email username")
+      .lean();
+
+    const studentData = (students || []).map((s) => {
+      const isLinked = !!s.userId?._id;
+
+      return {
+        ...s,
+        isLinked,
+        isActive: s?.userId?.isActive ?? true,         // fallback true for legacy
+        userRole: s?.userId?.role ?? "student",        // fallback
+      };
+    });
+
+    return res.send({ studentData });
+  } catch (e) {
+    console.error("getAllStudent error:", e);
+    return res.status(500).send({ message: "Some Internal Error" });
+  }
+};
 
 const singleStudent = async (req, res) => {
     try {
