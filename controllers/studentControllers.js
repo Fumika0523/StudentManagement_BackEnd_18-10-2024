@@ -94,20 +94,25 @@ const signIn = async (req, res) => {
 const getAllStudent = async (req, res) => {
   try {
     const students = await Student.find()
-      .populate("userId", "isActive role email username")
-      .lean();
+    .populate("userId", "firstName lastName email title phoneNumber isActive role")
+    .lean();
 
-    const studentData = (students || []).map((s) => {
-      const isLinked = !!s.userId?._id;
+  const studentData = (students || []).map((s) => {
+  const u = s.userId; // populated User
+  return {
+    ...s,
+    isLinked: !!u?._id,
+    isActive: u?.isActive ?? true,
+    userRole: u?.role ?? "student",
 
-      return {
-        ...s,
-        isLinked,
-        isActive: s?.userId?.isActive ?? true,         // fallback true for legacy
-        userRole: s?.userId?.role ?? "student",        // fallback
-      };
-    });
-
+    // handy for frontend:
+    userFirstName: u?.firstName || "",
+    userLastName: u?.lastName || "",
+    userEmail: u?.email || "",
+    userTitle: u?.title || "",
+    userPhoneNumber: u?.phoneNumber || "",
+  };
+});
     return res.send({ studentData });
   } catch (e) {
     console.error("getAllStudent error:", e);
@@ -118,7 +123,9 @@ const getAllStudent = async (req, res) => {
 const singleStudent = async (req, res) => {
     try {
         console.log(req.params.id)
-        const getStudent = await Student.findById(req.params.id)
+       const getStudent = await Student.findById(req.params.id)
+        .populate("userId", "firstName lastName email title phoneNumber country gender birthdate isActive role")
+        .lean();
         if (!getStudent) {
             res.send({ message: "The student cant be found" })
         }

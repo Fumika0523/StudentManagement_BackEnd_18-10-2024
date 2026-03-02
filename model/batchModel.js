@@ -6,13 +6,8 @@ const batchSchema = new mongoose.Schema({
     courseName:{type:String,required:true},
     targetStudent:{type:String,required:true},
     sessionDay:{type:String,required:true}, 
-    location: {
-      display: { type: String, required: true }, // e.g. "Tokyo, Japan"
-      city: { type: String, required: true },    // e.g. "Tokyo"
-      country: { type: String, required: true }, // e.g. "Japan"
-      countryCode: { type: String, required: true, uppercase: true }, // e.g. "JP"
-      timezone: { type: String, default: "" },   // e.g. "Asia/Tokyo"
-    },
+    location: 
+      {type:String,required:true},
     sessionTime:{type:String,required:true},
     fees:{type:Number,required:true},
     seq:{type:Number},

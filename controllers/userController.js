@@ -5,103 +5,88 @@ const sharp = require('sharp')
 
 const signUp = async (req, res) => {
   try {
-    // check if the user is already registered
-    let user = await User.findOne(
-    //   $or: [
-        { email: req.body.email },
-        // { phoneNumber: req.body.phoneNumber }
-    //   ]
-    );
+    const email = (req.body.email || "").trim().toLowerCase();
+    if (!email) return res.status(400).send({ message: "Email is required" });
 
-if (user) 
-    { console.log("User is found", req.body.email, user);
-     return res.status(400).send("User Already Exist. Please Log-in"); 
+    const existing = await User.findOne({ email });
+    if (existing) {
+      return res.status(400).send({ message: "User already exists. Please log in." });
     }
-    // password hashing
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
-    // save user
+    // password hashing (if not google)
+    if (!req.body.password && !req.body.googleId) {
+      return res.status(400).send({ message: "Password is required" });
+    }
+
+    let hashedPassword = undefined;
+    if (req.body.password) {
+      const salt = await bcrypt.genSalt(10);
+      hashedPassword = await bcrypt.hash(req.body.password, salt);
+    }
+
     const userData = new User({
       ...req.body,
-      password: hashedPassword
+      email,
+      password: hashedPassword,
     });
+
     await userData.save();
-    console.log("usreData",userData)
 
-    // if student role, also save in Student collection
-    if (req.body.role === "student") {
-      const studentData = new Student({
-        _id: userData._id,              // studentId = userId
-        username: req.body.username,   
-        firstName :req.body.firstName,
-        lastName:req.body.lastName,
-        displayName:req.body.name,
-        birthdate: req.body.birthdate,  
-        email: req.body.email,
-        phoneNumber: req.body.phoneNumber,
-        gender: req.body.gender,
-        password: hashedPassword,
-        role: req.body.role
+    // If student role: create Student doc linked by userId (no duplicated identity)
+    if (userData.role === "student") {
+      await Student.create({
+        userId: userData._id,
+        // Student domain fields only (add what you need later)
+        // e.g courseName, preferredCourses from req.body if you send them
+        courseName: req.body.courseName,
+        preferredCourses: req.body.preferredCourses || [],
       });
-      await studentData.save();
     }
-    console.log({ 
-      success: true,
-      user: userData, 
-      message: "Successfully registered a new user" 
-    })
-    res.status(200).json({ 
-      success: true,
-      user: userData, 
-      message: "Successfully registered a new user" 
-    });
 
+    return res.status(200).json({
+      success: true,
+      user: userData,
+      message: "Successfully registered a new user",
+    });
   } catch (e) {
     console.error(e);
-    res.status(500).send("Some Internal Error Occurred");
+    return res.status(500).send({ message: "Some Internal Error Occurred" });
   }
-}
+};
 
-const signIn = async(req,res)=>{
-   // try{
-        let user = await User.findOne({
-        //checking by user detail with email
-        //username coming from postman which you entering
-        username:req.body.username?.toLowerCase()
-        })
-       console.log(user)
-        //console.log(req.body.password)
-        if(!user){
-            return res.status(400).send
-            ({
-                message:"User is not exist"
-            })}
-            //checking by user with password
-            const isMatch = await bcrypt.compare(req.body.password,user.password)// from postman , from the email is matched?
-            if(!isMatch){
-                return res.status(400).send({
-                    message:"Please check your password"
-                })}
-                //if user and isMatch both validations are successful then generate the token
-                if(isMatch && user){
-                    const token = await user.generateAuthToken()
-                    return res.status(200).send({
-                        message:"You have successfully signed-in!",
-                        user:user,
-                        role: user.role,
-                        token:token,
-                    })
-                }
-            // If all conditions failed it will come to this
-            res.status(401).send({
-                message:"Your login credentials are incorrect, kindly check and re-try."
-            })
-    // }catch(e){
-    //         res.status(500).send({message:"Some Internal Error"})
-    // }
-}
+const signIn = async (req, res) => {
+  try {
+    const email = (req.body.email || "").trim().toLowerCase();
+    const password = req.body.password || "";
 
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).send({ message: "User does not exist" });
+    }
+
+    // if google user without password
+    if (!user.password) {
+      return res.status(400).send({ message: "This account uses Google login. Please sign in with Google." });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).send({ message: "Please check your password" });
+    }
+
+    const token = await user.generateAuthToken();
+
+    return res.status(200).send({
+      message: "You have successfully signed-in!",
+      user,
+      role: user.role,
+      token,
+    });
+  } catch (e) {
+    console.error("signIn error:", e);
+    return res.status(500).send({ message: "Some Internal Error" });
+  }
+};
 const getProfile =async(req,res)=>{
     try{
         //console.log(req.token)

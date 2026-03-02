@@ -3,34 +3,22 @@ const mongoose = require("mongoose");
 
 const studentSchema = new mongoose.Schema(
   {
-   //This student belongs to exactly one User, and every User can have at most one Student 
     userId: {
-      type: mongoose.Schema.Types.ObjectId, 
+      type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      // required: true,
+      required: true,
       unique: true,
       index: true,
     },
-    firstName: { type: String, required: true, trim: true },
-    lastName: { type: String, required: true, trim: true },
-    displayName: { type: String, trim: true },
 
-    username: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    // password: { type: String, required: true },
-
-    phoneNumber: { type: String, required: false, sparse: true }, // consider NOT unique
-    gender: { type: String, default: "Rather not say" },
-    birthdate: { type: Date },
-
-    courseName: { type: String },
-    admissionFee: { type: Number },
+    courseName: String,
+    admissionFee: Number,
     batchNumber: { type: String, default: null },
-    preferredCourses: { type: [String] },
+    preferredCourses: { type: [String], default: [] },
     status: { type: String, default: "Not Assigned" },
 
     courseId: { type: mongoose.Schema.Types.ObjectId, ref: "Course" },
-    admissionDate: { type: Date },
+    admissionDate: Date,
     admissionId: { type: mongoose.Schema.Types.ObjectId, ref: "Admission" },
   },
   { timestamps: true }

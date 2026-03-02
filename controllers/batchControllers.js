@@ -18,8 +18,7 @@ const addBatch = async (req, res) => {
   try {
     const year = new Date().getFullYear();
     // Find the last batch for this year
-    const lastBatch = await Batch.findOne({ batchNumber: { $regex: `^${year}-` } })
-                                 .sort({ seq: -1 });
+    const lastBatch = await Batch.findOne({ batchNumber: { $regex: `^${year}-` } }).sort({ seq: -1 });
     let nextSeq = 1; // default for first batch
     if (lastBatch) {
       nextSeq = lastBatch.seq + 1;
@@ -41,7 +40,6 @@ const addBatch = async (req, res) => {
     res.status(500).send({ message: "Some Internal Error" });
   }
 };
-
 
 const nextBatchNumber = async (req, res) => {
   try {

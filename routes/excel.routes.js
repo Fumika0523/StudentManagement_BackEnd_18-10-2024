@@ -16,6 +16,8 @@ router.post('/student-delete',upload.single('file'),bulkDisableStudentsExcel)
 router.get('/admission-template',downloadAdmissionTemplate)
 router.post('/admission-import',upload.single('file'),importAdmissionExcel)
 
-
+//Task
+router.put('/task-template')
+router.post('/task-import')
 
 module.exports = router

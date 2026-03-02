@@ -9,12 +9,16 @@ const taskQuestionSchema = new mongoose.Schema(
       trim: true,
     },
     batchNumber: {
-      type: String, 
+      type: [String], 
       required: true,
       trim: true,
     },
+     allocatedDay:{
+      type:Number,
+      required:true,
+    }
   },
-  { _id: true } // default is true anyway; subdocs will have _id
+  { _id: true } // mongoose generated id
 );
 
 const taskSchema = new mongoose.Schema(
@@ -24,12 +28,11 @@ const taskSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-
-
     taskDetail: {
       type: [taskQuestionSchema],
       default: [],
     },
+   
   },
   { timestamps: true }
 );
