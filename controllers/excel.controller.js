@@ -5,6 +5,7 @@ const path=require("path")
 const User = require('../model/userModel')
 const Admission = require('../model/admissionModel')
 const Student = require('../model/studentModel')
+const Task = require('../model/taskModel')
 
 //Sample
 const downloadTemplate = (req,res)=>{
@@ -60,7 +61,7 @@ console.log(e)
 }
 }
 
-//Student //
+//Student - Template //
 const downloadStudentTemplate=(req,res)=>{
     console.log("downloadStudentTemplate is calling..")
     const templateData = [
@@ -77,7 +78,7 @@ const downloadStudentTemplate=(req,res)=>{
     res.download(filePath, "students_template.xlsx")
 }
 
-//add and update
+//Student - add and update
 const addUpdateStudentExcel = async (req, res) => {
   console.log("importStudentExcel is calling");
 
@@ -232,7 +233,7 @@ const addUpdateStudentExcel = async (req, res) => {
   }
 };
 
-//delete
+//Student - delete
 const bulkDisableStudentsExcel = async (req, res) => {
   const workbook = xlsx.readFile(req.file.path);
   const sheetName = workbook.SheetNames[0];
@@ -284,12 +285,13 @@ const bulkDisableStudentsExcel = async (req, res) => {
   res.json({ message: "Disable processed", disabled, notFound, failed: errors.length, errors });
 };
 
+// ----------------------------------------------//
 
-//Admission//
+//Admission - Template
 const downloadAdmissionTemplate=(req,res)=>{
     console.log("downloadAdmissionTemplate is calling..")
     const templateData = [
-       {studentId:"", studentName:"", courseId:"", courseName:"", admissionSource:"", admissionFee:"",admissionDate:"",  courseName:"",batchNumber:"", } 
+      { studentId:"", studentName:"", courseId:"", courseName:"", admissionSource:"", admissionFee:"",admissionDate:"",  courseName:"",batchNumber:"", } 
     ]
     const wb = xlsx.utils.book_new() // new excel sheet
     const ws = xlsx.utils.json_to_sheet(templateData) //json data to sheet >> template Data
@@ -302,7 +304,8 @@ const downloadAdmissionTemplate=(req,res)=>{
     xlsx.writeFile(wb,filePath)
     res.download(filePath, "admissions_template.xlsx")
 }
-//Add & update admission
+
+//Admission - Add & update 
 const importAdmissionExcel = async(req,res)=>{
     console.log("import  from admissionBulkloadController is calling")
     try{
@@ -340,7 +343,100 @@ console.log("First row:", data?.[0]);
     }
 }
 
+//--------------------------------//
+
+//Task - Template
+const downloadTaskTemplate =(req,res)=>{
+  console.log("Downloading Task template...")
+  const templateData = [{
+      taskQuestion:"", batchNumber:"", allocatedDay:"", taskCourseName:"",
+  }
+  ]
+  const wb = xlsx.utils.book_new() // new excel sheet
+  const ws = xlsx.utils.json_to_sheet(templateData) // json data to sheet >> template data
+
+  xlsx.utils.book_append_sheet(wb,ws,"Tasks")
+
+  //store that location
+  console.log(path.join(__dirname,"../uploads/tasks_template.xlsx"))
+  const filePath = path.join(__dirname, "../uploads/task_template.xlsx")
+  xlsx.writeFile(wb,filePath)
+  res.download(filePath,"tasks_template.xlsx")
+  console.log(res.download(filePath,"tasks_template.xlsx"))
+}
+
+// Task - Add & Update 
+const importTaskExcel = async (req, res) => {
+  // This function imports tasks from an uploaded Excel file and saves them into MongoDB.
+
+  // If Postman (or frontend) didn't send a file, stop and return 400 error.
+  if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+
+  // Read the uploaded Excel file from the uploaded path (multer provides req.file.path).
+  const wb = xlsx.readFile(req.file.path);
+
+  // Get the first sheet in the workbook (your template uses one sheet: "Tasks").
+  const ws = wb.Sheets[wb.SheetNames[0]];
+
+  // Convert the sheet into an array of JS objects.
+  // Each row becomes an object using the header row as keys:
+  // e.g. { taskCourseName: "React", taskQuestion: "What is useEffect?", batchNumber: "B1,B2", allocatedDay: "1" }
+  const rows = xlsx.utils.sheet_to_json(ws, { raw: false });
+
+  // Counters for reporting how many courses were created (inserted) vs updated.
+  let inserted = 0;
+  let updated = 0;
+
+  // Loop through each row in the Excel file.
+  for (const row of rows) {
+    // Convert "batchNumber" text into an array of strings because your schema expects [String].
+    // Example: "B1,B2" -> ["B1", "B2"]
+    // String(...) prevents crash if the cell is empty/undefined.
+    const batches = String(row.batchNumber)
+      .split(",")              // split by comma
+      .map((s) => s.trim())    // remove spaces around each batch
+      .filter(Boolean);        // remove empty strings (e.g. trailing commas)
+
+    // Upsert (update or insert) into the Task collection.
+    // Filter: find the Task document for this course name.
+    const result = await Task.updateOne(
+      { taskCourseName: row.taskCourseName }, // find course
+
+      // Update operations:
+      {
+        // If the course document does NOT exist yet, create it with taskCourseName.
+        // If it already exists, do nothing for this field.
+        $setOnInsert: { taskCourseName: row.taskCourseName },
+
+        // Add (append) one task detail item into the taskDetail array.
+        $push: {
+          taskDetail: {
+            // Store the question string.
+            taskQuestion: row.taskQuestion,
+
+            // Store array of batch numbers (schema requires [String]).
+            batchNumber: batches,
+
+            // Convert allocatedDay to a number (schema requires Number).
+            allocatedDay: Number(row.allocatedDay),
+          },
+        },
+      },
+
+      // Options:
+      { upsert: true } // If no document matched the filter, create a new one.
+    );
+
+    // If MongoDB created a new document, upsertedCount will be 1.
+    if (result.upsertedCount) inserted++;
+    // Otherwise it updated an existing document (added to taskDetail).
+    else updated++;
+  }
+
+  // Send back a summary to the client (Postman/frontend).
+  res.json({ message: "Excel processed", inserted, updated });
+};
 //edit
 //delete
 
-module.exports={downloadTemplate,importExcel,downloadStudentTemplate, addUpdateStudentExcel,downloadAdmissionTemplate, importAdmissionExcel, bulkDisableStudentsExcel }
+module.exports={downloadTemplate,importExcel,downloadStudentTemplate, addUpdateStudentExcel,downloadAdmissionTemplate, importAdmissionExcel, bulkDisableStudentsExcel , downloadTaskTemplate,importTaskExcel }

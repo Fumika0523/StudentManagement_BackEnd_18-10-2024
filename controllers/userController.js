@@ -87,6 +87,7 @@ const signIn = async (req, res) => {
     return res.status(500).send({ message: "Some Internal Error" });
   }
 };
+
 const getProfile =async(req,res)=>{
     try{
         //console.log(req.token)
@@ -103,21 +104,43 @@ const getProfile =async(req,res)=>{
     }
 }
 
-const updateProfile = async(req,res)=>{
-    try{
-      console.log("Update Profile ID", req.user._id)
-      if(req.body.password){
-        const salt = await bcrypt.genSalt(10)
-        const hashedPassword= await bcrypt.hash(req.body.password,salt)
-        req.body.password=hashedPassword
-         }
-         const updateUser = await User.findByIdAndUpdate(req.user._id,req.body,{new:true,runValidators:true})
-         if(!updateUser){res.send({message:"User Not Found"})
-        }res.send(updateUser)
-     }catch(e){
-        res.send({message:"Some Internal Error"})
+const updateProfile = async (req, res) => {
+  try {
+    const { firstName, lastName, title, gender, phoneNumber, country, birthdate } = req.body;
+// updates has no "name" key yet
+    // update object with only allowed fields
+    const updates = { firstName, lastName, title, gender, phoneNumber, country, birthdate, email };
+
+    // Auto-sync the display name if either name are changed
+    // const obj = {a:1}
+    // obj.b=2  
+    // console.log(obj) >> {a:1, b:2}
+    if (firstName || lastName) {
+      const user = await User.findById(req.user._id);
+      //user.firstName >> fetching from the db >> current saved value.
+      //firstName is from re.body - it could be undefined if the user didnt send it.
+      updates.name = `${firstName || user.firstName} ${lastName || user.lastName}`.trim();
     }
-}
+
+    // Update and return the new doc (excluding password)
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id, // who to update >> the logged in user. ID from the JWT
+      //MongoDB operator 
+      //$set >> only update these specific fields, leave everything else alone
+      { $set: updates },// WHat to update - only the fields inside updates objects 
+      { new: true, // return the updated document, not the old one
+        runValidators: true //// enforce schema rules before saving
+      } 
+    ).select("-password"); // the password is stored in the db is a hashed version, not plain. but return to frontend with hashed code
+
+    if (!updatedUser) return res.status(404).json({ message: "User not found" });
+
+    res.status(200).json({ message: "Profile updated", userData: updatedUser });
+
+  } catch (e) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 const deleteProfile = async(req,res)=>{
     try{
@@ -134,6 +157,16 @@ const deleteProfile = async(req,res)=>{
         res.send({message:"Some Internal Error"})
     }
 }
+
+const getAllUser = async (req, res) => {
+  try {
+    const users = await User.find().lean();
+    return res.status(200).send({ userData: users });
+  } catch (e) {
+    console.error("Get All User error:", e);
+    return res.status(500).send({ message: "Some Internal Error" });
+  }
+};
 
 const dashboard = async(req,res)=>{
     try{
@@ -186,4 +219,4 @@ const uploadProfilePhoto =  async (req, res) => {
     }
 }
 
-module.exports ={signUp, signIn,getProfile, updateProfile,deleteProfile, dashboard, payment, uploadProfilePhoto}
+module.exports ={getAllUser, signUp, signIn,getProfile, updateProfile,deleteProfile, dashboard, payment, uploadProfilePhoto}

@@ -16,7 +16,7 @@ router.post('/registerstudent',addStudent)
 router.post('/loginstudent',signIn)
 
 //get (All)
-router.get('/allstudent',auth,getAllStudent)
+router.get('/allstudent',getAllStudent)
 
 //get 1 Student
 router.get('/student/:id',auth,singleStudent)

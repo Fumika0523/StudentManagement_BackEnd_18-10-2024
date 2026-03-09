@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
 const Student = require('../model/studentModel')
 const bcrypt = require('bcryptjs')
-const multer = require('multer')
+const multer = require('multer');
+const User = require("../model/userModel");
 const storage = multer.memoryStorage() //buffer
 
 
@@ -91,34 +92,26 @@ const signIn = async (req, res) => {
     }
 }
 
-const getAllStudent = async (req, res) => {
-  try {
-    const students = await Student.find()
-    .populate("userId", "firstName lastName email title phoneNumber isActive role")
-    .lean();
+const getAllStudent = async(req,res)=>{
+    try{
+    const students = await Student.find().populate("userId","firstName lastName gender email title phoneNumber country name birthdate isActive role").lean()
 
-  const studentData = (students || []).map((s) => {
-  const u = s.userId; // populated User
-  return {
-    ...s,
-    isLinked: !!u?._id,
-    isActive: u?.isActive ?? true,
-    userRole: u?.role ?? "student",
-
-    // handy for frontend:
-    userFirstName: u?.firstName || "",
-    userLastName: u?.lastName || "",
-    userEmail: u?.email || "",
-    userTitle: u?.title || "",
-    userPhoneNumber: u?.phoneNumber || "",
-  };
-});
-    return res.send({ studentData });
-  } catch (e) {
-    console.error("getAllStudent error:", e);
-    return res.status(500).send({ message: "Some Internal Error" });
-  }
-};
+    const studentData = students.map((student)=>{
+        const user = student.userId;
+        return {
+        ...student,
+        isActive: user?.isActive ?? true,
+        studentRole: user?.role ?? "student",
+        studentName:user?.name,
+        location:user?.country
+        }
+    })
+    return res.send({studentData:studentData})
+    }catch(e){
+        console.error("Get All Student error:",e)
+        return res.status(500).send({message:"Some Internal Error"})
+    }
+}
 
 const singleStudent = async (req, res) => {
     try {
@@ -137,26 +130,78 @@ const singleStudent = async (req, res) => {
     }
 }
 
+// Define an async function that handles updating a student.
+// req = incoming request, res = response we send back to the frontend.
 const updateStudent = async (req, res) => {
   try {
+
+    // Extract "id" from the URL params.
+    // e.g. PUT /updatestudent/abc123  →  id = "abc123"
+    // This is the Student document's _id (not the User _id).
     const { id } = req.params;
-    console.log("updateStudent - id:", req.params)
+
+    // Validate that "id" is a proper MongoDB ObjectId format.
+    // Prevents a database crash if someone sends a random string like "abc".
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: "Invalid student id" });
+      return res.status(400).json({ message: "Invalid student id" }); // 400 = Bad Request
     }
 
-    const updatedStudent = await Student.findByIdAndUpdate(
-      id,
-      req.body,
-      { new: true, runValidators: true }
-    );
+    // Destructure req.body into two groups:
+    // - Named fields (title, firstName, etc.) → belong to the User collection
+    // - ...studentFields (everything else)    → belong to the Student collection
+    const {
+      title, firstName, lastName, email,
+      phoneNumber, gender, birthdate, country,
+      ...studentFields  // catches remaining fields e.g. { preferredCourses, status }
+    } = req.body;
 
-    if (!updatedStudent) {
+    // Group all the User fields into one object to pass to User.findByIdAndUpdate.
+    // These are the fields that live in the User model (userModel.js).
+    const userFields = {
+      title, firstName, lastName, email,
+      phoneNumber, gender, birthdate, country,
+    };
+
+    // Step 1: Find the Student document by its _id.
+    // We need this first because the Student document holds "userId",
+    // which tells us which User document to update.
+    const student = await Student.findById(id);
+
+    // If no student was found with that id, stop and return a 404 error.
+    // 404 = Not Found
+    if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
 
+    // Step 2: Update the User document.
+    // student.userId is the reference (_id) to the linked User document.
+    // We pass userFields (name, email, phone, etc.) to update only the User collection.
+    // { new: true }          → return the updated document (not the old one)
+    // { runValidators: true } → enforce the schema rules (e.g. required, enum) on update
+    await User.findByIdAndUpdate(
+      student.userId,   // the _id of the User linked to this Student
+      userFields,       // the User fields to update
+      { new: true, runValidators: true }
+    );
+
+    // Step 3: Update the Student document.
+    // studentFields contains everything that wasn't a User field
+    // e.g. { preferredCourses: ["English", "Math"], status: "Not Assigned" }
+    // .populate("userId") → after updating, replace the userId reference
+    // with the full User object so the response contains complete student info.
+    const updatedStudent = await Student.findByIdAndUpdate(
+      id,             // the Student _id from the URL
+      studentFields,  // the Student fields to update
+      { new: true, runValidators: true }
+    ).populate("userId"); // join the User data into the response
+
+    // Send a 200 success response with the updated student data back to the frontend.
     res.json({ message: "Student updated successfully", updatedStudent });
+
   } catch (e) {
+    // If anything above throws an error (network, DB, validation, etc.),
+    // log it to the server console for debugging
+    // and return a 500 Internal Server Error to the frontend.
     console.error(e);
     res.status(500).json({ message: "Internal server error" });
   }

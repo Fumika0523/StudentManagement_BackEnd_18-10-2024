@@ -24,10 +24,6 @@ const studentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-//  indexes (no studentName!)
-// studentSchema.index({ username: 1 }, { unique: true });
-// studentSchema.index({ email: 1 }, { unique: true });
-studentSchema.index({ phoneNumber: 1 }, { sparse: true }); // only if you query by phone a lot
 
 studentSchema.pre("save", function (next) {
   if (!this.displayName) {
