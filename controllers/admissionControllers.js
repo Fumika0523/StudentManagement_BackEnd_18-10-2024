@@ -3,7 +3,6 @@ const Student = require('../model/studentModel')
 const Batch = require('../model/batchModel')
 const User = require('../model/userModel')
 
-
 // need to update batch number,
 const addAdmission = async (req, res) => {
   try {
@@ -161,7 +160,7 @@ if (target > 0 && assigned >= target) {
   }
 };
 
-
+//GET: All Admission
 const getAllAdmission = async(req,res)=>{
      try{
      //   console.log(req.token)
@@ -173,7 +172,8 @@ const getAllAdmission = async(req,res)=>{
         res.send({message:"Some Internal Error"})
     }}
 
-    const getSingleAdmission = async(req,res)=>{
+// GET: Single Admission
+const getSingleAdmission = async(req,res)=>{
     const admissionById = await Admission.findById(
         {_id:req.params.id}
     )
@@ -185,13 +185,11 @@ const getAllAdmission = async(req,res)=>{
 // Count should be incre/dec >>> if initially batchNumber is not alloted > Later update
 const updateAdmission = async (req, res) => {
   const admissionId = req.params.id;
-
   try {
     const currentAdmission = await Admission.findById(admissionId);
     if (!currentAdmission) {
       return res.status(404).json({ message: "Admission not found" });
     }
-
     // Prevent changing studentId via update (recommended)
     if (req.body.studentId && String(req.body.studentId) !== String(currentAdmission.studentId)) {
       return res.status(400).json({ message: "Changing studentId is not allowed in updateAdmission." });

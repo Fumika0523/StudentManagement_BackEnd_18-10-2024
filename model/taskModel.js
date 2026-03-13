@@ -8,10 +8,14 @@ const taskQuestionSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    batchNumber: {
-      type: [String], 
-      required: true,
-      trim: true,
+ batchNumber: {
+      type: [
+        {
+          type: String,
+          trim: true,
+        },
+      ],
+      default: [],
     },
      allocatedDay:{
       type:Number,

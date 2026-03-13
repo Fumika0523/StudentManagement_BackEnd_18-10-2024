@@ -6,8 +6,6 @@ const batchSchema = new mongoose.Schema({
     courseName:{type:String,required:true},
     targetStudent:{type:String,required:true},
     sessionDay:{type:String,required:true}, 
-    location: 
-      {type:String,required:true},
     sessionTime:{type:String,required:true},
     fees:{type:Number,required:true},
     seq:{type:Number},

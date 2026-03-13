@@ -9,7 +9,7 @@ router.get('/alltask',getAllTasks)
 router.post('/addtask',addTask)
 
 // Put 
-router.put('/update-task',updateTask)
+router.put('/update-task/:id',updateTask)
 
 
 

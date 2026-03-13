@@ -2,8 +2,8 @@ const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 
 const userSchema = new mongoose.Schema({
-    googleId: { type: String, trim: true },
-   title: {
+  googleId: { type: String, trim: true },
+  title: {
   type: String,
   enum: ["", "Mr", "Ms", "Mrs", "Mx", "Dr", "Prof"],
   default: "",
