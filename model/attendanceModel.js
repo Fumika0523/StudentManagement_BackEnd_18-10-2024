@@ -1,20 +1,17 @@
 const mongoose = require('mongoose');
 
 const attendanceSchema = new mongoose.Schema({
-  student: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', 
+  studentName: {
+    type: String,
     required: true
   },
-  batch: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Batch', 
+  batchNumber: {
+     type: String,
     required: true
   },
-  date: {
+  attendanceDate: {
     type: Date,
     required: true,
-    default: Date.now
   },
   status: {
     type: String,
@@ -22,10 +19,13 @@ const attendanceSchema = new mongoose.Schema({
     default: 'Present'
   },
   recordedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User' 
+    type: String,
+    required: true,
   }
 }, { timestamps: true });
 
 // Indexing for faster lookups when generating reports
 attendanceSchema.index({ student: 1, date: 1 }, { unique: true });
+
+const Attendance = mongoose.model("Attendance",attendanceSchema)
+module.exports = Attendance

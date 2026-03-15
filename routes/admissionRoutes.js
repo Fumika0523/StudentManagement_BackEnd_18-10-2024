@@ -8,7 +8,9 @@ const Batch = require ('../model/batchModel')
 
 
 
-router.post('/addadmission',auth,authorizationRole(["admin" , "staff"]),addAdmission)
+router.post('/addadmission'
+    // ,auth,authorizationRole(["admin" , "staff"])
+    ,addAdmission)
 //Table should be filled in View Student, prefered course in Student Model
 
 //get (all)

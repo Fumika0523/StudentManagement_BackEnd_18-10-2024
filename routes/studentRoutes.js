@@ -4,22 +4,22 @@ const router = express.Router()
 const bcrypt = require ('bcryptjs')
 const sharp = require('sharp')
 const {auth,authorizationRole} = require ('../middleware/auth')
-const {signIn, getAllStudent,singleStudent ,updateStudent,deleteStudent, addStudent} = require('../controllers/studentControllers')
+const { getAllStudent,singleStudent ,updateStudent,deleteStudent,studentSignUp, studentSignIn} = require('../controllers/studentControllers')
 const multer=require('multer')
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
 
 //POST
-router.post('/registerstudent',addStudent)
+router.post('/signup-student',studentSignUp)
 
 //Signed In
-router.post('/loginstudent',signIn)
+router.post('/signin-student',studentSignIn)
 
 //get (All)
-router.get('/allstudent',getAllStudent)
+router.get('/all-student',auth,getAllStudent)
 
 //get 1 Student
-router.get('/student/:id',auth,singleStudent)
+router.get('/student/:id',auth,authorizationRole(["student"]),singleStudent)
 
 //update
 router.put('/updatestudent/:id',auth,updateStudent)

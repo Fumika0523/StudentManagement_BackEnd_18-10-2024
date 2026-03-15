@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs')
 const sharp = require('sharp')
 const {auth, authorizationRole} = require ('../middleware/auth')
 const Student = require('../model/studentModel')
-const {signUp,signIn,getAllUser, getProfile, updateProfile, deleteProfile,dashboard,payment, uploadProfilePhoto} = require('../controllers/userController')
+const {signUp,signIn, getProfile, updateProfile, deleteProfile,dashboard,payment, uploadProfilePhoto} = require('../controllers/userController')
 
 router.get("/test",authorizationRole,(req,res)=>{
     console.log("test")
@@ -24,7 +24,7 @@ router.post('/users/profile/upload/image', auth, uploadProfilePhoto)
 // GET
 router.get('/users/profile',auth,getProfile)
 
-router.get('/allusers',getAllUser)
+// router.get('/allusers',getAllUser)
 
 //UPDATE
 router.put('/users/profile',auth,updateProfile)

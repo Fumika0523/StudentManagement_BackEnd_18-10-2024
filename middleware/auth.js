@@ -1,47 +1,66 @@
-const jwt = require('jsonwebtoken')
-const User = require('../model/userModel')
+const jwt = require("jsonwebtoken");
+const User = require("../model/userModel");
+const Student = require("../model/studentModel");
 
-const auth = async(req,res,next)=>{
-    console.log("Auth middleware is called")
-    console.log(req.header('Authorization'))
-    try{
-        if(!req.header('Authorization')){
-            return res.send
-            ({
-                message:"Authorization Header is Missing"
-            })
-        }
-        const token =req.header('Authorization').replace("Bearer ","")
-        const decode = jwt.verify(token,process.env.JWT_SECRET_KEY || "nodejs")
-        req.token = token
-        const user = await User.findOne({_id:decode._id})
-        req.user = user
-        if(!user){
-            req.send({
-                user,message:"User Not Found"
-            })
-        }
-        next()
-    }catch(e){
-        res.send({message:"Authentication Error"})
-    }}
+const auth = async (req, res, next) => {
+  try {
+    const authHeader = req.header("Authorization");
+    console.log("Authorization:", authHeader);
+
+    if (!authHeader) {
+      return res.status(401).send({
+        message: "Authorization header is missing",
+      });
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY || "nodejs");
+
+    req.token = token;
+
+    let account = null;
+
+    // token payload example: { id: "...", role: "student" }
+    console.log("decoded",decoded)
+    if (decoded.role === "student") {
+      account = await Student.findById(decoded._id);
+      req.student = account;
+    } else {
+      account = await User.findById(decoded._id);
+      req.user = account;
+    }
+
+    if (!account) {
+      return res.status(404).send({
+        message: `${decoded.role || "User"} not found`,
+      });
+    }
+
+    next();
+  } catch (e) {
+    console.error("Authentication error:", e);
+    return res.status(401).send({
+      message: "Authentication error",
+    });
+  }
+};
 
 const authorizationRole = (role) => {
   return (req, res, next) => {
-    if (!req.user || !req.user.role) {
+    const currentUser = req.user || req.student;
+
+    if (!currentUser || !currentUser.role) {
       console.log("Check role");
       return res.status(401).send("User not authenticated");
     }
 
-    // If role is an array, check if user's role is included
     if (Array.isArray(role)) {
-      if (!role.includes(req.user.role)) {
+      if (!role.includes(currentUser.role)) {
         console.log("No Access");
         return res.status(403).send("Forbidden Access - Not allowed");
       }
     } else {
-      // single role string
-      if (req.user.role !== role) {
+      if (currentUser.role !== role) {
         console.log("No Access");
         return res.status(403).send("Forbidden Access - Not allowed");
       }
@@ -52,4 +71,4 @@ const authorizationRole = (role) => {
   };
 };
 
-    module.exports = {auth,authorizationRole}
+module.exports = { auth, authorizationRole };

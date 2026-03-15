@@ -1,72 +1,53 @@
 const mongoose = require("mongoose");
 const Student = require('../model/studentModel')
-const bcrypt = require('bcryptjs')
 const multer = require('multer');
 const User = require("../model/userModel");
 const storage = multer.memoryStorage() //buffer
+const bcrypt = require("bcrypt");
 
+// POST: Sign up
+const studentSignUp = async (req, res) => {
+ // try {
+      let student = await Student.findOne({
+    $or: [
+        { email: req.body.email },
+        { phoneNumber: req.body.phoneNumber }
+     ]
+    });
+      console.log("student",student)
 
-const addStudent = async (req, res) => {
-    try {
-        let student = await Student.findOne({
-            $or: [
-                { studentName: req.body.studentName },
-                { username: req.body.username },
-                { email: req.body.email },
-                { phoneNumber: req.body.phoneNumber },
-            ]
-        })
-        console.log(req.body)
-        if (student) {
-            // Determine which field is duplicate
-            let duplicateField = '';
-            if (student.studentName === req.body.studentName) duplicateField = 'Student name';
-            else if (student.username === req.body.username) duplicateField = 'Username';
-            else if (student.email === req.body.email) duplicateField = 'Email';
-            else if (student.phoneNumber === req.body.phoneNumber) duplicateField = 'Phone number';
-
-            return res.status(400).send({
-                message: `${duplicateField} already exists. Please use a different one.`,
-                field: duplicateField.toLowerCase().replace(' ', '')
-            })
-        }
-        //password hashing
-        const salt = await bcrypt.genSalt(10)
-        const hashedPassword = await bcrypt.hash(req.body.password, salt)// using this round, combined with a password >> create a new pw
-        const studentData = new Student({
-            ...req.body,
-            password: hashedPassword
-        })
-        await studentData.save()
-        res.send({ student: studentData, message: "Successfully registred" })
-    } catch (e) {
-        // Handle MongoDB duplicate key error
-        if (e.code === 11000) {
-            const field = Object.keys(e.keyPattern)[0];
-            const fieldName = field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, ' $1');
-            
-            return res.status(400).send({
-                message: `${fieldName} already exists. Please use a different one.`,
-                field: field
-            })
-        }
-        
-        console.error("Error adding student:", e);
-        res.status(500).send({
-            message: "Some internal error occurred",
-            error: e.message
-        })
-    }
+    // password hashing
+   if(student){
+    console.log("Student is found",req.body.email)
+    return res.send("Student Already Exist. Please Log-in")
 }
+  const salt = await bcrypt.genSalt(10)
+  const hashedPassword = await bcrypt.hash(req.body.password,salt)// using this round, combined with a password >> create a new pw
+  const studentData = new Student({
+      ...req.body,
+      password:hashedPassword
+  })
+      await studentData.save();
+      return res.status(200).json({
+        success: true,
+        user: studentData,
+        message: "Successfully registered a new user",
+      });
+  // } catch (e) {
+  //   console.error(e);
+  //   return res.status(500).send({ message: "Some Internal Error Occurred" });
+  // }
+};
 
-const signIn = async (req, res) => {
+// POST: Sign in
+const studentSignIn = async (req, res) => {
     try {
         let student = await Student.findOne({
-            username: req.body.username
+            email: req.body.email
         })
         if (!student) {
             return res.status(400).send({
-                message: "username Not Found"
+                message: "Email Not Found"
             })
         }
         //Checking by student with pw
@@ -94,19 +75,8 @@ const signIn = async (req, res) => {
 
 const getAllStudent = async(req,res)=>{
     try{
-    const students = await Student.find().populate("userId","firstName lastName gender email title phoneNumber country name birthdate isActive role").lean()
-
-    const studentData = students.map((student)=>{
-        const user = student.userId;
-        return {
-        ...student,
-        isActive: user?.isActive ?? true,
-        studentRole: user?.role ?? "student",
-        studentName:user?.name,
-        location:user?.country
-        }
-    })
-    return res.send({studentData:studentData})
+    const students = await Student.find()
+    return res.send({studentData:students})
     }catch(e){
         console.error("Get All Student error:",e)
         return res.status(500).send({message:"Some Internal Error"})
@@ -115,15 +85,12 @@ const getAllStudent = async(req,res)=>{
 
 const singleStudent = async (req, res) => {
     try {
-        console.log(req.params.id)
-       const getStudent = await Student.findById(req.params.id)
-        .populate("userId", "firstName lastName email title phoneNumber country gender birthdate isActive role")
-        .lean();
-        if (!getStudent) {
+      const getSingleStudent = await Student.findById(req.params.id)
+        if (!getSingleStudent) {
             res.send({ message: "The student cant be found" })
         }
         else {
-            res.send({ StudentData: getStudent })
+            res.send({ singleStudentData: getSingleStudent })
         }
     } catch (e) {
         res.send({ message: "Some Internal Error" })
@@ -263,4 +230,4 @@ const deleteStudent = async (req, res) => {
 // fs module >> file system >> work with file
 // path module >> 
 
-module.exports = { signIn, getAllStudent, singleStudent, updateStudent, deleteStudent, addStudent, }
+module.exports = { getAllStudent, singleStudent, updateStudent, deleteStudent, studentSignUp,studentSignIn }

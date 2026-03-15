@@ -20,7 +20,6 @@ const jwt = require("jsonwebtoken");
 const taskRoutes = require('./routes/taskRoutes.js')
 
 connection()
-
 app.use(express.json())
 
 //set cookie
@@ -44,7 +43,6 @@ app.use(session({
 //passport
 app.use(passport.initialize())
 app.use(passport.session())
-
 app.use(userRoutes)
 app.use(studentRoutes)
 app.use(admissionRoutes)
@@ -80,7 +78,10 @@ app.get("/", (req, res) => {
 
 //Login Start
 app.get('/auth/google',
-    passport.authenticate('google',{scope:['profile','email']})
+    passport.authenticate(
+    'google',
+    {scope:['profile','email']}
+  )
 )
 
 //callback url in case you get error
@@ -99,7 +100,6 @@ app.get(
   (req, res) => {
     try {
       const user = req.user;
-
       //  Generate JWT
       const token = jwt.sign(
         {
@@ -109,7 +109,6 @@ app.get(
         process.env.JWT_SECRET_KEY,
         { expiresIn: "1d" }
       );
-
       //  Redirect to frontend OAuth handler
       res.redirect(
         `http://localhost:5174/oauth-success?token=${token}&role=student`

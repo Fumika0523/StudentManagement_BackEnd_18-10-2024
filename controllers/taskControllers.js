@@ -1,4 +1,6 @@
 const Task = require('../model/taskModel')
+// req = request from frontend
+// res = response sent back to frontend
 
 //GET: All Task 
 const getAllTasks = async(req,res)=>{
@@ -30,8 +32,11 @@ try{
 //PUT: update
 const updateTask = async (req, res) => {
   try {
-    console.log("req.params:", req.params);
-    console.log("req.body:", req.body);
+    //if route is /update-task/123
+    // req.params >> { id: "123" }
+    console.log("req.params:", req.params); //req.params: { id: '6998135064dc20706affca70' }
+    //req.body: { batchId: '69af6ee5cef735dc40ea9217', batchNumber: '2026-0002' }
+    console.log("req.body:", req.body); //batchNum
 
     const taskDetailId = req.params.id;
     const { batchNumber } = req.body;
@@ -39,10 +44,11 @@ const updateTask = async (req, res) => {
     if (!batchNumber) {
       return res.status(400).json({ message: "batchNumber is required" });
     }
-
+//  find  taskDetail._id matches the id from the URL
     const updatedTask = await Task.findOneAndUpdate(
       { "taskDetail._id": taskDetailId },
       {
+       // $addToSet adds batchNumber into the array only if it does not already exist to prevents duplicate batch num.
         $addToSet: {
           "taskDetail.$.batchNumber": batchNumber,
         },
