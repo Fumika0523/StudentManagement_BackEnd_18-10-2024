@@ -2,7 +2,7 @@
 const Attendance = require('../model/attendanceModel');
 
 const submitAttendance = async (req, res) => {
- // try {
+ try {
     const attendanceDetail = new Attendance(req.body)
     if(!attendanceDetail){
       res.status(401).send({
@@ -14,9 +14,9 @@ const submitAttendance = async (req, res) => {
       message:"Attendance has been marked successfully."
     })
 
-  // } catch (error) {
-  //   res.status(500).json({ error: error.message });
-  // }
+  } catch (error) {
+    res.status(500).json({ error: error });
+  }
 };
 
 

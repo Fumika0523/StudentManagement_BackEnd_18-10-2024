@@ -24,11 +24,10 @@ app.use(express.json())
 
 //set cookie
 app.use(cors({
-    origin: 'http://localhost:5174', // when it's production?
+    origin: 'http://localhost:5173', 
     credentials:true,
 }))
 
-app.use(express.json())
 app.use(session({
     secret:process.env.secret,
     resave:false,
@@ -111,11 +110,11 @@ app.get(
       );
       //  Redirect to frontend OAuth handler
       res.redirect(
-        `http://localhost:5174/oauth-success?token=${token}&role=student`
+        `http://localhost:5173/oauth-success?token=${token}&role=student`
       );
     } catch (err) {
       console.error("Google OAuth error:", err);
-      res.redirect("http://localhost:5174/signin");
+      res.redirect("http://localhost:5173/signin");
     }
   }
 );
