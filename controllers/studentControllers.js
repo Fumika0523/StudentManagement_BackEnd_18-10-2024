@@ -180,7 +180,7 @@ const deleteStudent = async (req, res) => {
         const deletedStudent = await Student.findOneAndDelete({
             _id: req.params.id
         })
-        if (!deleteStudent) {
+        if (!deletedStudent) {
             return res.status(404).send({ message: "Student Not Found" });
         }
         return res.status(200).send({ 
